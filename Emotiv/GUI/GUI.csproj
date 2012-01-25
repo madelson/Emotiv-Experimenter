@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5D89CC4C-D586-4860-969D-C31327EFB132}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MCAEmotiv.GUI</RootNamespace>
+    <AssemblyName>Experimenter</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\Experimenter.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>MCAEmotiv.GUI.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="JacksonSoft.CustomTabControl">
+      <HintPath>..\..\ThirdPartyDLLs\JacksonSoft.CustomTabControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Animation\Animator.cs" />
+    <Compile Include="Animation\AbstractTimedView.cs" />
+    <Compile Include="Animation\ChoiceView.cs" />
+    <Compile Include="Animation\ClassifierManager.cs" />
+    <Compile Include="Animation\SoundView.cs" />
+    <Compile Include="Animation\TrainView.cs" />
+    <Compile Include="Animation\ExperimentProvider.cs" />
+    <Compile Include="Animation\FixationView.cs" />
+    <Compile Include="Animation\ImageView.cs" />
+    <Compile Include="Animation\RestView.cs" />
+    <Compile Include="Animation\StimulusClassSetupProvider.cs" />
+    <Compile Include="Animation\TextView.cs" />
+    <Compile Include="Animation\View.cs" />
+    <Compile Include="Common\DisplayPointer.cs" />
+    <Compile Include="Common\Extensions.cs" />
+    <Compile Include="CompetitionExperiment\VocabView.cs" />
+    <Compile Include="CompetitionExperiment\CompetitionExperimentProvider.cs" />
+    <Compile Include="CompetitionExperiment\CompetitionExperimentSettings.cs" />
+    <Compile Include="CompetitionExperiment\CompetitionClassSelectorPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Configurations\ArtifactDetection.cs" />
+    <Compile Include="Configurations\ExperimentSettings.cs" />
+    <Compile Include="Configurations\ClassificationScheme.cs" />
+    <Compile Include="Configurations\ImageDisplaySettings.cs" />
+    <Compile Include="Configurations\StimulusClass.cs" />
+    <Compile Include="Controls\ClassificationSchemePanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ClassificationSchemeTab.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\CustomTab.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ConfigurationPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\DerivedTypeConfigurationPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\EmotivStatusCheckerPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ExperimentPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\ImagePanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Animation\IViewProvider.cs" />
+    <Compile Include="Common\GUIUtils.cs" />
+    <Compile Include="Controls\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\StimulusClassPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\StimulusClassTab.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Emotiv\Emotiv.csproj">
+      <Project>{FC9BE73C-34F5-42A1-B965-041190E68BA8}</Project>
+      <Name>Emotiv</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

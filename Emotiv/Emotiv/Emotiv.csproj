@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{FC9BE73C-34F5-42A1-B965-041190E68BA8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MCAEmotiv</RootNamespace>
+    <AssemblyName>Emotiv</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\Emotiv.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DotNetEmotivSDK">
+      <HintPath>..\..\ThirdPartyDLLs\DotNetEmotivSDK.dll</HintPath>
+    </Reference>
+    <Reference Include="MathNet.Iridium">
+      <HintPath>..\..\ThirdPartyDLLs\MathNet.Iridium.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Analysis\AnalysisExtensions.cs" />
+    <Compile Include="Analysis\FFT.cs" />
+    <Compile Include="Classification\AdaBoost.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classification\AmplitudeDecisionStump.cs" />
+    <Compile Include="Classification\DecisionStump.cs" />
+    <Compile Include="Classification\Example.cs" />
+    <Compile Include="Classification\Classifiers.cs" />
+    <Compile Include="Classification\IKernel.cs" />
+    <Compile Include="Classification\KNN.cs" />
+    <Compile Include="Classification\PenalizedLogisticRegression.cs" />
+    <Compile Include="Classification\VotedPerceptron.cs" />
+    <Compile Include="Common\AbstractEnumerable.cs" />
+    <Compile Include="Common\Arrays.cs" />
+    <Compile Include="Common\BlockingQueue.cs" />
+    <Compile Include="Common\Extensions.cs" />
+    <Compile Include="Common\ParameterAttribute.cs" />
+    <Compile Include="Common\RandomizedQueue.cs" />
+    <Compile Include="Common\SafeDisposable.cs" />
+    <Compile Include="Common\Invokers.cs" />
+    <Compile Include="Common\Utils.cs" />
+    <Compile Include="Interop\Channel.cs" />
+    <Compile Include="Interop\EEGDataEntry.cs" />
+    <Compile Include="Interop\EmotivDataSource.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interop\EmotivHeadset.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interop\IEEGDataListener.cs" />
+    <Compile Include="Interop\IEEGDataSource.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Common\Tuples.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
