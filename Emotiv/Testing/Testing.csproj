@@ -59,6 +59,7 @@
     <Compile Include="Unit\ExampleTests.cs" />
     <Compile Include="Unit\ExtensionsTests.cs" />
     <Compile Include="Unit\ParameterTests.cs" />
+    <Compile Include="Unit\RandomizedQueueTests.cs" />
     <Compile Include="Unit\SerializableTests.cs" />
     <Compile Include="Unit\SyncTests.cs" />
   </ItemGroup>

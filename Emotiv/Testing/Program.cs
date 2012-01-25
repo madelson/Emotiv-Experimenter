@@ -18,6 +18,7 @@ namespace MCAEmotiv.Testing
             ChannelTests.Run();
             ControlTests.Run();
             SyncTests.Run();
+            RandomizedQueueTests.Run();
             "Finished!".Print();
 
             while (true)
