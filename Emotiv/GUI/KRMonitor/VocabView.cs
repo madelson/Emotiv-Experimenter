@@ -5,24 +5,28 @@ using System.Text;
 using MCAEmotiv.GUI.Animation;
 using System.Windows.Forms;
 
-namespace MCAEmotiv.GUI.CompetitionExperiment
+namespace MCAEmotiv.GUI.KRMonitor
 {
     class VocabView : MCAEmotiv.GUI.Animation.View
     {
-        public VocabView(string testStimulus, string correctAns, IEnumerable<string> answers, int delayTimeMillis, out IViewResult result)
+        public VocabView(string testStimulus, string correctAns, int displayTimeMillis, int delayTimeMillis, out IViewResult result)
             : base()
         {
-            TextView test = new TextView(testStimulus, -1); //-1 is infinite time
+            TextView test = new TextView(testStimulus, displayTimeMillis); //-1 is infinite time
+            string[] answers = new string[1];
+            //Currently the only option is the correct answer
+            //To do: Randomly select a subset of answers OR do free response
+            answers[0] = correctAns;
             ChoiceView choice = new ChoiceView(answers);
             var timer = this.RegisterDisposable(new Timer() { Interval = delayTimeMillis, Enabled = false });
             var rows = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Vertical);
             var testPanel = new Panel { Dock = DockStyle.Fill };
             var choicePanel = new Panel { Dock = DockStyle.Fill, Enabled = false };
             rows.Controls.Add(testPanel, 0, 0);
-            rows.Controls.Add(choicePanel, 0, 1);
             timer.Tick += (sender, args) =>
             {
                 choicePanel.Enabled = true;
+                rows.Controls.Add(choicePanel, 0, 1);
                 timer.Enabled = false;
             };
             this.DoOnDeploy(c =>

@@ -8,6 +8,8 @@ using MCAEmotiv.Interop;
 using MCAEmotiv.GUI.CompetitionExperiment;
 using System.IO;
 using MCAEmotiv.GUI.Configurations;
+using MCAEmotiv.GUI.KRMonitor;
+using MCAEmotiv.Common;
 
 namespace MCAEmotiv.GUI.Controls
 {
@@ -70,6 +72,148 @@ namespace MCAEmotiv.GUI.Controls
         }
 
         #region ---- Build View ----
+
+        /// <summary>
+        /// Builds the application view for the KR Monitoring Application
+        /// </summary>
+        public void BuildKRMonitorView()
+        {
+            this.SuspendLayout();
+            this.Text = GUIUtils.Strings.APP_NAME;
+            this.Size = new System.Drawing.Size(1500, 750);
+
+            //Settings panel
+            var config = ConfigurationPanel.Create<KRMonitorSettings>();
+            var artifactConfig = ConfigurationPanel.Create<ArtifactDetectionSettings>();
+            var stimulipanel = new KRMonitorSelectorPanel() { Dock = DockStyle.Fill };
+
+            //Headset Connected?
+            EmotivStatusCheckerPanel statusChecker = new EmotivStatusCheckerPanel() { Dock = DockStyle.Fill };
+
+            // start button
+            var startButton = GUIUtils.CreateFlatButton("Start Experiment", b =>
+            {
+                var settings = (KRMonitorSettings)config.GetConfiguredObject();
+                settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
+                var presentation = this.ReadKRStimuli(stimulipanel.PresentationFile);
+                var test = this.ReadKRStimuli(stimulipanel.TestFile);
+                var ans = this.ReadKRStimuli(stimulipanel.AnsFile);
+                //DIFFERENCE: Test stimuli and their answers are bound using the StudyTestPair object
+                //So that we can run the test phases randomly while still keeping the answers correct
+                RandomizedQueue<StudyTestPair> stp = new RandomizedQueue<StudyTestPair>();
+                for (int i = 0; i < test.Count; i++)
+                {
+                    stp.Add(new StudyTestPair(test[i], ans[i]));
+                }
+                if (presentation == null)
+                    return;
+                //To Do: Add a dialog box so that the user knows whether the headset is connected
+                IEEGDataSource dataSource;
+                if (statusChecker.HeadsetConnected)
+                {
+                    dataSource = EmotivDataSource.Instance;
+                }
+                else
+                    dataSource = new MockEEGDataSource();
+                this.Animate(new KRMonitorProvider(presentation, stp, settings, dataSource));
+            });
+
+            var saveDialog = new SaveFileDialog()
+            {
+                Title = "Save experiment settings",
+                Filter = "Experiment settings files|*.krmonsettings",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            };
+            var openDialog = new OpenFileDialog()
+            {
+                Title = "Select the saved experiment settings (.krmonsettings) file",
+                Filter = "Experiment settings files|*.krmonsettings",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                Multiselect = false
+            };
+
+            // button table
+            var buttonTable = GUIUtils.CreateButtonTable(Direction.Horizontal, DockStyle.Fill,
+            GUIUtils.CreateFlatButton("Save", b =>
+            {
+                var settings = (KRMonitorSettings)config.GetConfiguredObject();
+                settings.PresentationFile = stimulipanel.PresentationFile;
+                settings.TestFile = stimulipanel.TestFile;
+                settings.AnsFile = stimulipanel.AnsFile;
+                settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
+                saveDialog.FileName = string.IsNullOrWhiteSpace(settings.ExperimentName) ? "my experiment" : settings.ExperimentName;
+                if (saveDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                bool saved = settings.TrySerializeToFile(saveDialog.FileName);
+                GUIUtils.Alert((saved ? "Saved" : "Failed to save")
+                    + " experiment info to " + saveDialog.FileName,
+                    (saved ? MessageBoxIcon.Information : MessageBoxIcon.Error));
+
+                string directory = Path.GetDirectoryName(saveDialog.FileName);
+                if (Directory.Exists(directory))
+                    saveDialog.InitialDirectory = directory;
+            }, null, "Save experiment configuration information"),
+            GUIUtils.CreateFlatButton("Load", b =>
+            {
+                if (openDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                KRMonitorSettings settings;
+
+                if (Utils.TryDeserializeFile(openDialog.FileName, out settings))
+                {
+                    config.SetConfiguredObject(settings);
+                    stimulipanel.PresentationFile = settings.PresentationFile;
+                    stimulipanel.TestFile = settings.TestFile;
+                    stimulipanel.AnsFile = settings.AnsFile;
+                    artifactConfig.SetConfiguredObject(settings.ArtifactDetectionSettings);
+                }
+                else
+                    GUIUtils.Alert("Failed to load experiment info from " + openDialog.FileName, MessageBoxIcon.Error);
+
+            }, null, "Load a previously saved experiment settings file"));
+
+
+            var rows = GUIUtils.CreateTable(new[] { .5, .2, .3 }, Direction.Vertical);
+            var col1 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
+            var col2 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
+            var col3 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
+
+            col2.Controls.Add(artifactConfig, 1, 0);
+            col1.Controls.Add(startButton, 1, 0);
+            col1.Controls.Add(statusChecker, 0, 0);
+            col2.Controls.Add(config, 0, 0);
+            col3.Controls.Add(stimulipanel, 1, 0);
+            col3.Controls.Add(buttonTable, 0, 0);
+            rows.Controls.Add(col3, 0, 1);
+            rows.Controls.Add(col1, 0, 2);
+            rows.Controls.Add(col2, 0, 0);
+
+
+            this.Controls.Add(rows);
+
+
+            this.ResumeLayout(false);
+        }
+
+        private IArrayView<string> ReadKRStimuli(string path)
+        {
+            try
+            {
+                var lines = File.ReadAllLines(path);
+                var stimuli = lines.Select(s => s.Replace(@"\n", Environment.NewLine))
+                    .ToIArray();
+                return stimuli;
+            }
+            catch (Exception)
+            {
+                GUIUtils.Alert("Failed to Read File" + path);
+                return null;
+            }
+        }
+
+
         /// <summary>
         /// Builds the application view for the competition experiment
         /// </summary>

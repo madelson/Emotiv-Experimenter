@@ -68,7 +68,8 @@
     <Compile Include="Animation\View.cs" />
     <Compile Include="Common\DisplayPointer.cs" />
     <Compile Include="Common\Extensions.cs" />
-    <Compile Include="CompetitionExperiment\VocabView.cs" />
+    <Compile Include="KRMonitor\StudyTestPair.cs" />
+    <Compile Include="KRMonitor\VocabView.cs" />
     <Compile Include="CompetitionExperiment\CompetitionExperimentProvider.cs" />
     <Compile Include="CompetitionExperiment\CompetitionExperimentSettings.cs" />
     <Compile Include="CompetitionExperiment\CompetitionClassSelectorPanel.cs">
@@ -114,6 +115,11 @@
     <Compile Include="Controls\StimulusClassTab.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="KRMonitor\KRMonitorSelectorPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="KRMonitor\KRMonitorProvider.cs" />
+    <Compile Include="KRMonitor\KRMonitorSettings.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

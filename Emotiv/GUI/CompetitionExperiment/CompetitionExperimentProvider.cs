@@ -116,12 +116,12 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
                     if (blockCount > this.settings.NumBlocks * 2)
                         break;
                     logWriter.WriteLine("Current Class: {0}, Block Number: {1}", block.cls, blockCount);
+                    yield return new TextView("Current Class: " + block.cls, 2500, GUIUtils.Constants.DISPLAY_FONT_LARGE);
                     foreach (var stimulus in block.stimuli)
                     {
                         foreach (var view in RunTrial(stimulus, block.cls, dataWriter, logWriter, currentTrialEntries))
                             yield return view;
                     }
-                    yield return new TextView("Please Clear Your Mind", 2500, GUIUtils.Constants.DISPLAY_FONT_LARGE);
                     blockCount++;
                 }
                 logWriter.WriteLine("Experiment Concluded.");
@@ -131,7 +131,8 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
 
         public IEnumerable<View> RunTrial(string stimulus, int cls, StreamWriter dataWriter, StreamWriter logWriter, List<EEGDataEntry> currentTrialEntries)
         {
-            yield return new TextView("Blink Now", this.settings.BlinkTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+            //yield return new TextView("Blink Now", this.settings.BlinkTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+            yield return new RestView(this.settings.BlinkTime);
             yield return new FixationView(this.settings.FixationTime);
             var stimulusView = new TextView(stimulus, this.settings.DisplayTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
             stimulusView.DoOnDeploy(c => this.dataSource.Marker = cls);

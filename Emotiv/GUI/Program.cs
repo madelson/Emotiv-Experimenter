@@ -25,7 +25,7 @@ namespace MCAEmotiv.GUI
             Application.SetCompatibleTextRenderingDefault(false);
             
             //MainForm.Instance.BuildExperimenterView();
-            MainForm.Instance.BuildCompetitionExperimenterView();
+            MainForm.Instance.BuildKRMonitorView();
             Application.Run(MainForm.Instance);
             
             EmotivDataSource.Instance.Dispose();
