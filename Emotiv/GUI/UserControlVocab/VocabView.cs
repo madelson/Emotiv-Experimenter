@@ -5,7 +5,7 @@ using System.Text;
 using MCAEmotiv.GUI.Animation;
 using System.Windows.Forms;
 
-namespace MCAEmotiv.GUI.KRMonitor
+namespace MCAEmotiv.GUI.UserControlVocab
 {
     class VocabView : MCAEmotiv.GUI.Animation.View
     {
@@ -13,7 +13,6 @@ namespace MCAEmotiv.GUI.KRMonitor
             : base()
         {
             TextView test = new TextView(testStimulus, displayTimeMillis, GUIUtils.Constants.DISPLAY_FONT_LARGE); //-1 is infinite time
-            //mchoice is a bool that indicates whether the vocab view should be multiple choice or not. I haven't actually handled this properly
             if (mchoice)
             {
                 string[] answers = new string[1];
@@ -46,7 +45,6 @@ namespace MCAEmotiv.GUI.KRMonitor
                     });
                 result = this.Result;
             }
-                //ISSUE: In the free response version, no matter what I try, I can't get the cursor to automatically be in the text box
             else
             {
                 FreeResponseView frView = new FreeResponseView();

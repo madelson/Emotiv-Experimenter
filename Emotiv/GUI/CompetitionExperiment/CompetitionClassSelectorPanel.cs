@@ -6,6 +6,9 @@ using System.Windows.Forms;
 
 namespace MCAEmotiv.GUI.CompetitionExperiment
 {
+    /// <summary>
+    /// A selector panel for files for the Competition Experiment
+    /// </summary>
     public class CompetitionClassSelectorPanel : Panel 
     {
         private readonly LinkLabel presentationLink = new LinkLabel() { Text = "Please Select a File", Dock = DockStyle.Bottom, };
@@ -19,10 +22,16 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
             Multiselect = false
         };
 
+        /// <summary>
+        /// The file from which initial study stimuli are read
+        /// </summary>
         public string PresentationFile { get { return this.presentationLink.Text; } set {
             presentationLink.Text = value;
         }
         }
+        /// <summary>
+        /// The file from which the first class (competitive or noncompetitive) is read
+        /// </summary>
         public string Class1File
         {
             get { return this.class1Link.Text; }
@@ -31,6 +40,9 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
                 class1Link.Text = value;
             }
         }
+        /// <summary>
+        /// The file from which the second class (competitive or noncompetitive) is read
+        /// </summary>
         public string Class2File
         {
             get { return this.class2Link.Text; }
@@ -39,7 +51,9 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
                 class2Link.Text = value;
             }
         }
-
+        /// <summary>
+        /// The selector panel for files forthe competition experiment
+        /// </summary>
         public CompetitionClassSelectorPanel() : base()
         {
             var presentationLabel = "Presentation Stimuli".ToLabel(DockStyle.Bottom);

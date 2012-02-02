@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace MCAEmotiv.GUI.KRMonitor
+namespace MCAEmotiv.GUI.UserControlVocab
 {
     /// <summary>
-    /// The file selector panel for the Karpicke-Roediger with Monitoring Software
+    /// The selector panel for files in the User-Controlled Vocab Software
     /// </summary>
-    public class KRMonitorSelectorPanel : Panel 
+    public class UserCtrlSelectorPanel : Panel 
     {
         private readonly LinkLabel presentationLink = new LinkLabel() { Text = "Please Select a File", Dock = DockStyle.Bottom, };
         private readonly LinkLabel testLink = new LinkLabel() { Text = "Please Select a File", Dock = DockStyle.Bottom };
@@ -23,14 +23,14 @@ namespace MCAEmotiv.GUI.KRMonitor
         };
 
         /// <summary>
-        /// The file from which study phase stimuli are read
+        /// The file from which stimuli for the initial study phase are read
         /// </summary>
         public string PresentationFile { get { return this.presentationLink.Text; } set {
             presentationLink.Text = value;
         }
         }
         /// <summary>
-        /// The file from which test phase stimuli are read
+        /// The file from which the quiz questions are read
         /// </summary>
         public string TestFile
         {
@@ -41,7 +41,7 @@ namespace MCAEmotiv.GUI.KRMonitor
             }
         }
         /// <summary>
-        /// The file from which answers for test phase stimuli are read
+        /// THe file from which the answers are read
         /// </summary>
         public string AnsFile
         {
@@ -52,9 +52,9 @@ namespace MCAEmotiv.GUI.KRMonitor
             }
         }
         /// <summary>
-        /// The selector panel for files for the Karpicke-Roediger monitoring experiment
+        /// The selector panel for files for the User Controlled Vocab software
         /// </summary>
-        public KRMonitorSelectorPanel() : base()
+        public UserCtrlSelectorPanel() : base()
         {
             var presentationLabel = "Presentation Stimuli".ToLabel(DockStyle.Bottom);
             var testLabel = "Test Stimuli".ToLabel(DockStyle.Bottom);

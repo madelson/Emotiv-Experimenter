@@ -68,6 +68,7 @@
     <Compile Include="Animation\View.cs" />
     <Compile Include="Common\DisplayPointer.cs" />
     <Compile Include="Common\Extensions.cs" />
+    <Compile Include="KRMonitor\FreeResponseView.cs" />
     <Compile Include="KRMonitor\StudyTestPair.cs" />
     <Compile Include="KRMonitor\VocabView.cs" />
     <Compile Include="CompetitionExperiment\CompetitionExperimentProvider.cs" />
@@ -122,6 +123,14 @@
     <Compile Include="KRMonitor\KRMonitorSettings.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserControlVocab\FreeResponseView.cs" />
+    <Compile Include="UserControlVocab\UserCtrlProvider.cs" />
+    <Compile Include="UserControlVocab\UserCtrlSelectorPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="UserControlVocab\UserCtrlSettings.cs" />
+    <Compile Include="UserControlVocab\StudyTestPair.cs" />
+    <Compile Include="UserControlVocab\VocabView.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

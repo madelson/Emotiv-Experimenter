@@ -23,6 +23,7 @@ namespace MCAEmotiv.Analysis
             bool useMirror = false)
         {
             var channelData = trial.Channel(channel);
+            //THROWING EXCEPTION: IT SAYS THE SEQUENCE IS EMPTY
             double avg = channelData.Average();
             if (channelData.MovingAverages(round1Alpha).Select(ma => Math.Abs(ma - avg)).Max() > round1Threshold)
                 return true;

@@ -26,7 +26,8 @@ namespace MCAEmotiv.GUI
             
             //MainForm.Instance.BuildExperimenterView();
             //MainForm.Instance.BuildKRMonitorView();
-            MainForm.Instance.BuildCompetitionExperimenterView();
+            MainForm.Instance.BuildUserCtrlView();
+            //MainForm.Instance.BuildCompetitionExperimenterView();
             Application.Run(MainForm.Instance);
             
             EmotivDataSource.Instance.Dispose();

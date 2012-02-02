@@ -75,8 +75,8 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
         /// <summary>
         /// The number of blocks of each class displayed during the Retrieval Practice Phase
         /// </summary>
-        [Parameter("The number of blocks per class", DisplayName = "Number Blocks per Class", DefaultValue= 1, MinValue = 1)]
-        public int NumBlocks {get; set; }
+        [Parameter("The number of blocks per class", DisplayName = "Number Blocks per Class", DefaultValue = 1, MinValue = 1)]
+        public int NumBlocks { get; set; }
 
         /// <summary>
         /// Should the application create a log of the experiment?
@@ -90,11 +90,11 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
         [Parameter("Should " + GUIUtils.Strings.APP_NAME + " save labeled trial EEG data collected during the experiment?", DisplayName = "Save Trial Data", DefaultValue = false)]
         public bool SaveTrialData { get; set; }
 
-        /// <summary>
-        /// Should the application save the raw EEG data collected during the experiment?
-        /// </summary>
-        [Parameter("Should " + GUIUtils.Strings.APP_NAME + " save the raw EEG data collected during the experiment?", DisplayName = "Save Raw Data", DefaultValue = false)]
-        public bool SaveRawData { get; set; }
+        ///// <summary>
+        ///// Should the application save the raw EEG data collected during the experiment?
+        ///// </summary>
+        //[Parameter("Should " + GUIUtils.Strings.APP_NAME + " save the raw EEG data collected during the experiment?", DisplayName = "Save Raw Data", DefaultValue = false)]
+        //public bool SaveRawData { get; set; }
 
         /// <summary>
         /// The folder where logs and data files are saved. Not a parameter
@@ -140,11 +140,6 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
             return this.GetParameters()
                 .Select(p => p.DisplayName + "=" + this.GetProperty(p.Property))
                 .Then("Output Folder=" + this.OutputFolder)
-                .Then("Image Display Settings {")
-                //.Concat(this.ImageDisplaySettings
-                //    .GetParameters()
-                //    .Select(ip => "\t" + ip.DisplayName + "=" + this.ImageDisplaySettings.GetProperty(ip.Property)))
-                .Then("}")
                 .ConcatToString(Environment.NewLine);
         }
     }

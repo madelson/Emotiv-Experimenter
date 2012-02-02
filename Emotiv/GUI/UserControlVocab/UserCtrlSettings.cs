@@ -4,19 +4,19 @@ using System.Linq;
 using System.Text;
 using MCAEmotiv.GUI.Configurations;
 
-namespace MCAEmotiv.GUI.KRMonitor
+namespace MCAEmotiv.GUI.UserControlVocab
 {
     /// <summary>
     /// General parameters for an experiment
     /// </summary>
     [Serializable]
     [Description("Experiment configuration", DisplayName = "Settings")]
-    public class KRMonitorSettings
+    public class UserCtrlSettings
     {
         /// <summary>
         /// The file extension used when serializing this class
         /// </summary>
-        public const string EXTENSION = ".krmon";
+        public const string EXTENSION = ".user";
 
         /// <summary>
         /// The name of the experiment
@@ -79,10 +79,10 @@ namespace MCAEmotiv.GUI.KRMonitor
         public int InstructionTime { get; set; }
 
         /// <summary>
-        /// The number of Study-Practice Rounds
+        /// The number of Study-Practice Trials
         /// </summary>
-        [Parameter("The number of Study-Practice Rounds", DisplayName = "Number Rounds", DefaultValue= 1, MinValue = 1)]
-        public int NumRounds {get; set; }
+        [Parameter("The number of Trials", DisplayName = "Number Trials", DefaultValue= 40, MinValue = 1)]
+        public int NumTrials {get; set; }
 
         /// <summary>
         /// Should the application create a log of the experiment?
@@ -90,17 +90,17 @@ namespace MCAEmotiv.GUI.KRMonitor
         [Parameter("Should " + GUIUtils.Strings.APP_NAME + " create a log of the experiment?", DisplayName = "Log Experiment", DefaultValue = false)]
         public bool LogExperiment { get; set; }
 
-        /// <summary>
-        /// Should the application save labeled trial EEG data collected during the experiment?
-        /// </summary>
-        [Parameter("Should " + GUIUtils.Strings.APP_NAME + " save labeled trial EEG data collected during the experiment?", DisplayName = "Save Trial Data", DefaultValue = false)]
-        public bool SaveTrialData { get; set; }
+        ///// <summary>
+        ///// Should the application save labeled trial EEG data collected during the experiment?
+        ///// </summary>
+        //[Parameter("Should " + GUIUtils.Strings.APP_NAME + " save labeled trial EEG data collected during the experiment?", DisplayName = "Save Trial Data", DefaultValue = false)]
+        //public bool SaveTrialData { get; set; }
 
-        /// <summary>
-        /// Should the application save the raw EEG data collected during the experiment?
-        /// </summary>
-        [Parameter("Should " + GUIUtils.Strings.APP_NAME + " save the raw EEG data collected during the experiment?", DisplayName = "Save Raw Data", DefaultValue = false)]
-        public bool SaveRawData { get; set; }
+        ///// <summary>
+        ///// Should the application save the raw EEG data collected during the experiment?
+        ///// </summary>
+        //[Parameter("Should " + GUIUtils.Strings.APP_NAME + " save the raw EEG data collected during the experiment?", DisplayName = "Save Raw Data", DefaultValue = false)]
+        //public bool SaveRawData { get; set; }
 
         /// <summary>
         /// The folder where logs and data files are saved. Not a parameter
@@ -122,15 +122,15 @@ namespace MCAEmotiv.GUI.KRMonitor
         /// </summary>
         public string AnsFile { get; set; }
 
-        /// <summary>
-        /// The artifact detection settings object for the experiment. Not a parameter
-        /// </summary>
-        public ArtifactDetectionSettings ArtifactDetectionSettings { get; set; }
+        ///// <summary>
+        ///// The artifact detection settings object for the experiment. Not a parameter
+        ///// </summary>
+        //public ArtifactDetectionSettings ArtifactDetectionSettings { get; set; }
 
         /// <summary>
         /// Construct a settings object with the default parameter values
         /// </summary>
-        public KRMonitorSettings() { this.SetParametersToDefaultValues(); }
+        public UserCtrlSettings() { this.SetParametersToDefaultValues(); }
 
 
         /// <summary>
