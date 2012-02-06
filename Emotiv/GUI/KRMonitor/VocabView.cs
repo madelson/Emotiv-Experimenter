@@ -18,7 +18,6 @@ namespace MCAEmotiv.GUI.KRMonitor
             {
                 string[] answers = new string[1];
                 //Currently the only option is the correct answer
-                //To do: Randomly select a subset of answers OR do free response
                 answers[0] = correctAns;
                 ChoiceView choice = new ChoiceView(answers);
                 var timer = this.RegisterDisposable(new Timer() { Interval = delayTimeMillis, Enabled = false });
@@ -50,7 +49,7 @@ namespace MCAEmotiv.GUI.KRMonitor
             else
             {
                 FreeResponseView frView = new FreeResponseView();
-                frView.textBox.Focus();
+                
                 var timer = this.RegisterDisposable(new Timer() { Interval = delayTimeMillis, Enabled = false });
                 var rows = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Vertical);
                 var testPanel = new Panel { Dock = DockStyle.Fill };
@@ -59,17 +58,17 @@ namespace MCAEmotiv.GUI.KRMonitor
                 timer.Tick += (sender, args) =>
                 {
                     frPanel.Enabled = true;
-                    frView.textBox.Focus();
+                    
                     rows.Controls.Add(frPanel, 0, 1);
                     timer.Enabled = false;
                 };
                 this.DoOnDeploy(c =>
                 {
-                    frView.textBox.Focus();
+                    
                     c.Controls.Add(rows);
                     this.DeploySubView(test, testPanel, causesOwnerToFinish: false);
                     this.DeploySubView(frView, frPanel, causesOwnerToFinish: true);
-                    frView.textBox.Focus();
+                    
                     timer.Enabled = true;
                 });
                 this.DoOnFinishing(() =>

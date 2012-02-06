@@ -111,7 +111,13 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
                     if (blockCount > this.settings.NumBlocks * 2)
                         break;
                     logWriter.WriteLine("Current Class: {0}, Block Number: {1}", block.cls, blockCount);
-                    yield return new TextView("Current Class: " + block.cls, 2500, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                    //yield return new TextView("Current Class: " + block.cls, 2500, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                    IViewResult result;
+                    // offer to save
+                    yield return new ChoiceView(new string[] 
+                {   
+                    "Ready for next block"
+                    }, out result);
                     foreach (var stimulus in block.stimuli)
                     {
                         foreach (var view in RunTrial(stimulus, block.cls, dataWriter, logWriter, currentTrialEntries))

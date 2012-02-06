@@ -210,7 +210,7 @@ namespace MCAEmotiv.GUI.UserControlVocab
             //The user controls which group the stimulus goes into after the trial
             StudyTestPair toAdd = new StudyTestPair(tst, ans);
             if (!isStudy)
-                yield return new TextView((bool)vocabView.Result.Value ? "Correct" : "Incorrect", settings.FeedbackTime, GUIUtils.Constants.DISPLAY_FONT);
+                yield return new TextView((bool)vocabView.Result.Value ? "Correct" : "Incorrect", settings.FeedbackTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
                 string[] options = { "Study Soon", "Test Soon", "Test Later" };
                 ChoiceView choice = new ChoiceView(options);
                 yield return choice;

@@ -32,7 +32,7 @@ namespace MCAEmotiv.GUI.UserControlVocab
             textBox.TextAlign = HorizontalAlignment.Center;
             textBox.Size = txtboxsize;
             //NOTE: each instance of textBox.Focus() is a futile attempt to get the cursor to appear in the textbox on deploy
-            textBox.Focus();  
+            
 
             var button = GUIUtils.CreateFlatButton(
                 "Submit",
@@ -46,17 +46,20 @@ namespace MCAEmotiv.GUI.UserControlVocab
 
             var table = GUIUtils.CreateTable(new[] { .75, .25 }, Direction.Vertical);
             var cols = GUIUtils.CreateTable(new[] { .35, .3, .35 }, Direction.Horizontal);
-            textBox.Focus();
+            
             cols.Controls.Add(textBox, 1, 0);
-            textBox.Focus();
+            
             table.Controls.Add(cols, 0, 0);
             table.Controls.Add(submitPanel, 0, 1);
+
+            // when the table is displayed on the screen, give input focus to the textbox
+            table.Paint += (s, e) => textBox.Focus();
             // when the view deploys, install its controls
             this.DoOnDeploy(c =>
             {
-                textBox.Focus();
+                
                 c.Controls.Add(table);
-                textBox.Focus();
+                
             });
         }
 

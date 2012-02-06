@@ -68,6 +68,12 @@
     <Compile Include="Animation\View.cs" />
     <Compile Include="Common\DisplayPointer.cs" />
     <Compile Include="Common\Extensions.cs" />
+    <Compile Include="FalseAdapt\FalseAdaptSelectorPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FalseAdapt\FalseAdaptProvider.cs" />
+    <Compile Include="FalseAdapt\FalseAdaptSettings.cs" />
+    <Compile Include="FalseAdapt\StudyTestTuple.cs" />
     <Compile Include="KRMonitor\FreeResponseView.cs" />
     <Compile Include="KRMonitor\StudyTestPair.cs" />
     <Compile Include="KRMonitor\VocabView.cs" />

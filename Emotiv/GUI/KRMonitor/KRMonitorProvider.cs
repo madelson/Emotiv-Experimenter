@@ -36,6 +36,8 @@ namespace MCAEmotiv.GUI.KRMonitor
         public override IEnumerator<View> GetEnumerator()
         {
             IViewResult result;
+            Random numgen = new Random();
+            int a, b;
             RandomizedQueue<string> pres = new RandomizedQueue<string>();
             RandomizedQueue<string> usedPres = new RandomizedQueue<string>();
             pres.AddRange(presentation);
@@ -49,7 +51,7 @@ namespace MCAEmotiv.GUI.KRMonitor
                 { 
                     "Start Study Phase"
                 }, out result) { Text = "Click When Ready" };
-
+                    
                     while (pres.Count > 0)
                     {
                         var stimulus = pres.RemoveRandom();
@@ -58,6 +60,12 @@ namespace MCAEmotiv.GUI.KRMonitor
                         usedPres.Add(stimulus);
                     }
                     pres.AddRange(usedPres);
+                    
+                    a = numgen.Next(13);
+                    b = numgen.Next(13);
+
+                    yield return new VocabView(string.Format("{0} x {1} = {2}", a, b, a * b), "Correct", settings.DisplayTime, settings.DelayTime, true, out result);
+
                     yield return new ChoiceView(new string[] 
                 { 
                     "Start Test Phase"
@@ -136,16 +144,16 @@ namespace MCAEmotiv.GUI.KRMonitor
             yield return new FixationView(this.settings.FixationTime);
             IViewResult result;
             var vocabView = new VocabView(tst, ans, settings.DisplayTime, settings.DelayTime, false, out result);
-            vocabView.DoOnDeploy(c => this.dataSource.Marker = index);
+            vocabView.DoOnDeploy(c => this.dataSource.Marker = index+1);
             bool needToRerun = false;
-            //ISSUE: first, the artifact detection should stop after the delay is over. Secondly, the artifact detection is throwing an
-            //exception (see comment keyphrase "THROWING EXCEPTION" in AnalysisExtensions.cs
+            
             vocabView.DoOnFinishing(() =>
             {
                 this.dataSource.Marker = EEGDataEntry.MARKER_DEFAULT;
                 lock (currentTrialEntries)
                 {
-                    if (this.settings.ArtifactDetectionSettings.HasMotionArtifact(currentTrialEntries))
+                    var trialsDuringDelay = currentTrialEntries.Where(e => e.RelativeTimeStamp <= settings.DelayTime);
+                    if (this.settings.ArtifactDetectionSettings.HasMotionArtifact(trialsDuringDelay))
                     {
                         logWriter.WriteLine("Motion Artifact Detected");
                         needToRerun = true;
@@ -154,7 +162,7 @@ namespace MCAEmotiv.GUI.KRMonitor
                     {
                         if (this.settings.SaveTrialData)
                         {
-                            foreach (var entry in currentTrialEntries)
+                            foreach (var entry in trialsDuringDelay)
                             {
                                 dataWriter.WriteLine(entry);
                             }
