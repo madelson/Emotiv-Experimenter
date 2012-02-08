@@ -118,10 +118,14 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
                 {   
                     "Ready for next block"
                     }, out result);
+                    int j = 0;
                     foreach (var stimulus in block.stimuli)
                     {
                         foreach (var view in RunTrial(stimulus, block.cls, dataWriter, logWriter, currentTrialEntries))
                             yield return view;
+                        j++;
+                        if (j > 36)
+                            break;
                     }
                     blockCount++;
                 }
@@ -167,6 +171,7 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
             });
             logWriter.WriteLine(stimulus);
             yield return stimulusView;
+            yield return new TextView(stimulus + "*", settings.DisplayTime + 1000, GUIUtils.Constants.DISPLAY_FONT_LARGE);
             //Rerun if needed
             if (needToRerun)
             {
