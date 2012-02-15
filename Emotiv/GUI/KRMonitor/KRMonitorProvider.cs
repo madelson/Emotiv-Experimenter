@@ -51,7 +51,7 @@ namespace MCAEmotiv.GUI.KRMonitor
                 { 
                     "Start Study Phase"
                 }, out result) { Text = "Click When Ready" };
-                    
+
                     while (pres.Count > 0)
                     {
                         var stimulus = pres.RemoveRandom();
@@ -60,11 +60,11 @@ namespace MCAEmotiv.GUI.KRMonitor
                         usedPres.Add(stimulus);
                     }
                     pres.AddRange(usedPres);
-                    
+
                     a = numgen.Next(13);
                     b = numgen.Next(13);
 
-                    yield return new VocabView(string.Format("{0} x {1} = {2}", a, b, a * b), "Correct", settings.DisplayTime, settings.DelayTime, true, out result);
+                    yield return new VocabView(string.Format("{0} x {1} = {2}", a, b, a * b), "Verify", settings.DisplayTime, settings.DelayTime, true, out result);
 
                     yield return new ChoiceView(new string[] 
                 { 
@@ -77,7 +77,7 @@ namespace MCAEmotiv.GUI.KRMonitor
                     {
                         // listen for a broken connection
                         this.dataSource.AddListener(connectionListener);
-                        foreach (var view in this.GetViews(invoker, logWriter, dataWriter, pres))
+                        foreach (var view in this.GetViews(invoker, logWriter, dataWriter, i, pres))
                             if (connected)
                                 yield return view;
                             else
@@ -92,11 +92,11 @@ namespace MCAEmotiv.GUI.KRMonitor
             }
         }
 
-        private IEnumerable<View> GetViews(ISynchronizeInvoke invoker, StreamWriter logWriter, StreamWriter dataWriter, RandomizedQueue<string> pres)
+        private IEnumerable<View> GetViews(ISynchronizeInvoke invoker, StreamWriter logWriter, StreamWriter dataWriter, int round, RandomizedQueue<string> pres)
         {
             var currentTrialEntries = new List<EEGDataEntry>();
             //To do: Save the date/time earlier and use it for both this and the dataWriter. Put it in GetEnumerator and pass to GetViews
-            
+
             using (var artifactListener = new EEGDataListener(invoker, null, data =>
             {
                 foreach (var entry in data)
@@ -116,21 +116,20 @@ namespace MCAEmotiv.GUI.KRMonitor
                 //DIFFERENCE: Instead of getting blocks, we want to go through the entire set once for each test phase, but we
                 //want items within that set to be random
                 RandomizedQueue<StudyTestPair> usedPairs = new RandomizedQueue<StudyTestPair>();
-                
+
                 var stimulusPairs = new RandomizedQueue<StudyTestPair>();
                 stimulusPairs.AddRange(this.stp);
-                int index = 0;
+                
                 while (stimulusPairs.Count > 0)
                 {
                     StudyTestPair currstp = stimulusPairs.RemoveRandom();
                     usedPairs.Add(currstp);
                     logWriter.WriteLine("Question: " + currstp.test);
                     logWriter.WriteLine("Correct Answer: " + currstp.answer);
-                    foreach (var view in RunTrial(index, currstp.test, currstp.answer, dataWriter, logWriter, currentTrialEntries, pres))
+                    foreach (var view in RunTrial(round, currstp.test, currstp.answer, dataWriter, logWriter, currentTrialEntries, pres))
                     {
                         yield return view;
                     }
-                    index++;
 
                 }
                 stimulusPairs.AddRange(usedPairs);
@@ -144,9 +143,9 @@ namespace MCAEmotiv.GUI.KRMonitor
             yield return new FixationView(this.settings.FixationTime);
             IViewResult result;
             var vocabView = new VocabView(tst, ans, settings.DisplayTime, settings.DelayTime, false, out result);
-            vocabView.DoOnDeploy(c => this.dataSource.Marker = index+1);
-            bool needToRerun = false;
-            
+            vocabView.DoOnDeploy(c => this.dataSource.Marker = index);
+            //bool needToRerun = false;
+
             vocabView.DoOnFinishing(() =>
             {
                 this.dataSource.Marker = EEGDataEntry.MARKER_DEFAULT;
@@ -156,7 +155,7 @@ namespace MCAEmotiv.GUI.KRMonitor
                     if (this.settings.ArtifactDetectionSettings.HasMotionArtifact(trialsDuringDelay))
                     {
                         logWriter.WriteLine("Motion Artifact Detected");
-                        needToRerun = true;
+                        //needToRerun = true;
                     }
                     else
                     {
@@ -178,13 +177,13 @@ namespace MCAEmotiv.GUI.KRMonitor
             if ((bool)result.Value)
                 pres.Remove(tst + Environment.NewLine + ans);
             logWriter.WriteLine("User Answer: " + result.Value);
-            if (needToRerun)
-            {
-                foreach (var view in RunTrial(index, tst, ans, dataWriter, logWriter, currentTrialEntries, pres))
-                {
-                    yield return view;
-                }
-            }
+            //if (needToRerun)
+            //{
+            //    foreach (var view in RunTrial(index, tst, ans, dataWriter, logWriter, currentTrialEntries, pres))
+            //    {
+            //        yield return view;
+            //    }
+            //}
         }
 
     }

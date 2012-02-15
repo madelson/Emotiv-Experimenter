@@ -61,10 +61,10 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
         public int FixationTime { get; set; }
 
         /// <summary>
-        /// The amount of time (in ms) for which the instructions are displayed
+        /// The amount of time (in ms) for the subject to speak
         /// </summary>
-        [Parameter("The amount of time (in ms) for which the instructions are displayed", DisplayName = "Instruction Time", DefaultValue = 1500, MinValue = 0)]
-        public int InstructionTime { get; set; }
+        [Parameter("The amount of time (in ms) for the subject to speak", DisplayName = "Speak Time", DefaultValue = 1500, MinValue = 0)]
+        public int SpeakTime { get; set; }
 
         /// <summary>
         /// The number of images of each class dislplayed in training mode
