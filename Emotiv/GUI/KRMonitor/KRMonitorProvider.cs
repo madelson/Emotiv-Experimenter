@@ -42,7 +42,7 @@ namespace MCAEmotiv.GUI.KRMonitor
             RandomizedQueue<string> usedPres = new RandomizedQueue<string>();
             pres.AddRange(presentation);
             using (var logWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "krmon_log_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".txt")))
-            using (var dataWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "krmon_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".csv")))
+            using (var dataWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "krmon_data_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".csv")))
             {
                 //Alternating Study and Test Phases
                 for (int i = 0; i < settings.NumRounds; i++)
