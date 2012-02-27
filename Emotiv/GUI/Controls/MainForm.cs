@@ -130,7 +130,7 @@ namespace MCAEmotiv.GUI.Controls
             var buttonTable = GUIUtils.CreateButtonTable(Direction.Horizontal, DockStyle.Fill,
             GUIUtils.CreateFlatButton("Save", b =>
             {
-                var settings = (KRMonitorSettings)config.GetConfiguredObject();
+                var settings = (FalseAdaptSettings)config.GetConfiguredObject();
                 settings.PresentationFile = stimulipanel.PresentationFile;
                 settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
                 saveDialog.FileName = string.IsNullOrWhiteSpace(settings.ExperimentName) ? "my experiment" : settings.ExperimentName;
@@ -246,7 +246,7 @@ namespace MCAEmotiv.GUI.Controls
             };
             var openDialog = new OpenFileDialog()
             {
-                Title = "Select the saved experiment settings (.krmonsettings) file",
+                Title = "Select the saved experiment settings (.usersettings) file",
                 Filter = "Experiment settings files|*.usersettings",
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 Multiselect = false
@@ -356,7 +356,7 @@ namespace MCAEmotiv.GUI.Controls
                 RandomizedQueue<MCAEmotiv.GUI.KRMonitor.StudyTestPair> stp = new RandomizedQueue<MCAEmotiv.GUI.KRMonitor.StudyTestPair>();
                 for (int i = 0; i < test.Count; i++)
                 {
-                    stp.Add(new MCAEmotiv.GUI.KRMonitor.StudyTestPair(test[i], ans[i]));
+                    stp.Add(new MCAEmotiv.GUI.KRMonitor.StudyTestPair(test[i], ans[i], i));
                 }
                 if (presentation == null)
                     return;

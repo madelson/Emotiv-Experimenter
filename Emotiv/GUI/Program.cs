@@ -25,7 +25,7 @@ namespace MCAEmotiv.GUI
             Application.SetCompatibleTextRenderingDefault(false);
             
             //MainForm.Instance.BuildExperimenterView();
-            //MainForm.Instance.BuildKRMonitorView();
+            MainForm.Instance.BuildKRMonitorView();
             //MainForm.Instance.BuildUserCtrlView();
             //MainForm.Instance.BuildCompetitionExperimenterView();
             //MainForm.Instance.BuildFAdaptView();

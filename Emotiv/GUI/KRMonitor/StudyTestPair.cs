@@ -9,10 +9,12 @@ namespace MCAEmotiv.GUI.KRMonitor
     {
         public string test;
         public string answer;
-        public StudyTestPair(string tst, string ans)
+        public int index;
+        public StudyTestPair(string tst, string ans, int i)
         {
             this.test = tst;
             this.answer = ans;
+            this.index = i;
         }
     }
 }

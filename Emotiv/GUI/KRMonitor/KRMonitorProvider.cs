@@ -60,9 +60,10 @@ namespace MCAEmotiv.GUI.KRMonitor
                         usedPres.Add(stimulus);
                     }
                     pres.AddRange(usedPres);
+                    usedPres.Clear();
 
-                    a = numgen.Next(13);
-                    b = numgen.Next(13);
+                    a = numgen.Next(4, 13);
+                    b = numgen.Next(4, 13);
 
                     yield return new VocabView(string.Format("{0} x {1} = {2}", a, b, a * b), "Verify", settings.DisplayTime, settings.DelayTime, true, out result);
 
@@ -124,9 +125,8 @@ namespace MCAEmotiv.GUI.KRMonitor
                 {
                     StudyTestPair currstp = stimulusPairs.RemoveRandom();
                     usedPairs.Add(currstp);
-                    logWriter.WriteLine("Question: " + currstp.test);
-                    logWriter.WriteLine("Correct Answer: " + currstp.answer);
-                    foreach (var view in RunTrial(round, currstp.test, currstp.answer, dataWriter, logWriter, currentTrialEntries, pres))
+                    //logWriter.WriteLine("Question: " + currstp.index);
+                    foreach (var view in RunTrial(round, currstp.test, currstp.answer, currstp.index, dataWriter, logWriter, currentTrialEntries, pres))
                     {
                         yield return view;
                     }
@@ -137,13 +137,13 @@ namespace MCAEmotiv.GUI.KRMonitor
         }
 
 
-        public IEnumerable<View> RunTrial(int index, string tst, string ans, StreamWriter dataWriter, StreamWriter logWriter, List<EEGDataEntry> currentTrialEntries, RandomizedQueue<string> pres)
+        public IEnumerable<View> RunTrial(int index, string tst, string ans, int numstim, StreamWriter dataWriter, StreamWriter logWriter, List<EEGDataEntry> currentTrialEntries, RandomizedQueue<string> pres)
         {
             yield return new RestView(this.settings.BlinkTime);
             yield return new FixationView(this.settings.FixationTime);
             IViewResult result;
             var vocabView = new VocabView(tst, ans, settings.DisplayTime, settings.DelayTime, false, out result);
-            vocabView.DoOnDeploy(c => this.dataSource.Marker = index);
+            vocabView.DoOnDeploy(c => this.dataSource.Marker = index+1);
             //bool needToRerun = false;
 
             vocabView.DoOnFinishing(() =>
@@ -163,7 +163,7 @@ namespace MCAEmotiv.GUI.KRMonitor
                         {
                             foreach (var entry in trialsDuringDelay)
                             {
-                                dataWriter.WriteLine(entry);
+                                dataWriter.WriteLine(entry + ", {0}", numstim);
                             }
                         }
 
@@ -174,9 +174,14 @@ namespace MCAEmotiv.GUI.KRMonitor
             yield return vocabView;
             //No feedback in original Karpicke and Roediger, but I'm leaving the option 
             //yield return new TextView((bool)result.Value ? "Correct" : "Incorrect", settings.FeedbackTime, GUIUtils.Constants.DISPLAY_FONT);
+            int towrite = 0;
             if ((bool)result.Value)
+            {
                 pres.Remove(tst + Environment.NewLine + ans);
-            logWriter.WriteLine("User Answer: " + result.Value);
+                towrite = 1;
+            }
+            
+            logWriter.WriteLine(numstim + ", " + towrite);
             //if (needToRerun)
             //{
             //    foreach (var view in RunTrial(index, tst, ans, dataWriter, logWriter, currentTrialEntries, pres))
