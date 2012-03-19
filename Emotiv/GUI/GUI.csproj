@@ -68,6 +68,11 @@
     <Compile Include="Animation\View.cs" />
     <Compile Include="Common\DisplayPointer.cs" />
     <Compile Include="Common\Extensions.cs" />
+    <Compile Include="Test\TestProvider.cs" />
+    <Compile Include="Test\TestSelectorPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Test\TestSettings.cs" />
     <Compile Include="FalseAdapt\FalseAdaptSelectorPanel.cs">
       <SubType>Component</SubType>
     </Compile>

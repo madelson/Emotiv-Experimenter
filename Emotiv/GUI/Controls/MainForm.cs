@@ -12,6 +12,7 @@ using MCAEmotiv.GUI.KRMonitor;
 using MCAEmotiv.Common;
 using MCAEmotiv.GUI.UserControlVocab;
 using MCAEmotiv.GUI.FalseAdapt;
+using MCAEmotiv.GUI.Test;
 
 namespace MCAEmotiv.GUI.Controls
 {
@@ -74,6 +75,130 @@ namespace MCAEmotiv.GUI.Controls
         }
 
         #region ---- Build View ----
+
+        /// <summary>
+        /// Builds the application view for the Test Application
+        /// </summary>
+        public void BuildTestView()
+        {
+            this.SuspendLayout();
+            this.Text = GUIUtils.Strings.APP_NAME;
+            this.Size = new System.Drawing.Size(1500, 750);
+
+            //Settings panels
+            var config = ConfigurationPanel.Create<TestSettings>();
+            
+            var stimulipanel = new TestSelectorPanel() { Dock = DockStyle.Fill };
+
+            // start button
+            var startButton = GUIUtils.CreateFlatButton("Start Experiment", b =>
+            {
+                var settings = (TestSettings)config.GetConfiguredObject();
+                
+                var presentation = this.ReadTestStimuli(stimulipanel.PresentationFile);
+                var test = this.ReadTestStimuli(stimulipanel.TestFile);
+                var ans = this.ReadTestStimuli(stimulipanel.AnsFile);
+                //Make study-test pairs for practice phase
+                RandomizedQueue<MCAEmotiv.GUI.KRMonitor.StudyTestPair> stp = new RandomizedQueue<MCAEmotiv.GUI.KRMonitor.StudyTestPair>();
+                for (int i = 0; i < test.Count; i++)
+                {
+                    stp.Add(new MCAEmotiv.GUI.KRMonitor.StudyTestPair(test[i], ans[i], i));
+                }
+                if (presentation == null)
+                    return;
+                
+                this.Animate(new TestProvider(presentation, stp, settings));
+            });
+
+            //Dialog boxes for saving and loading experiment settings
+            var saveDialog = new SaveFileDialog()
+            {
+                Title = "Save experiment settings",
+                Filter = "Experiment settings files|*.Testsettings",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            };
+            var openDialog = new OpenFileDialog()
+            {
+                Title = "Select the saved experiment settings (.testsettings) file",
+                Filter = "Experiment settings files|*.testsettings",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                Multiselect = false
+            };
+
+            // button table for saving and loading experiment settings
+            var buttonTable = GUIUtils.CreateButtonTable(Direction.Horizontal, DockStyle.Fill,
+            GUIUtils.CreateFlatButton("Save", b =>
+            {
+                var settings = (TestSettings)config.GetConfiguredObject();
+                settings.PresentationFile = stimulipanel.PresentationFile;
+                settings.TestFile = stimulipanel.TestFile;
+                settings.AnsFile = stimulipanel.AnsFile;
+                
+                saveDialog.FileName = string.IsNullOrWhiteSpace(settings.ExperimentName) ? "my experiment" : settings.ExperimentName;
+                if (saveDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                bool saved = settings.TrySerializeToFile(saveDialog.FileName);
+                GUIUtils.Alert((saved ? "Saved" : "Failed to save")
+                    + " experiment info to " + saveDialog.FileName,
+                    (saved ? MessageBoxIcon.Information : MessageBoxIcon.Error));
+
+                string directory = Path.GetDirectoryName(saveDialog.FileName);
+                if (Directory.Exists(directory))
+                    saveDialog.InitialDirectory = directory;
+            }, null, "Save experiment configuration information"),
+            GUIUtils.CreateFlatButton("Load", b =>
+            {
+                if (openDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                TestSettings settings;
+
+                if (Utils.TryDeserializeFile(openDialog.FileName, out settings))
+                {
+                    config.SetConfiguredObject(settings);
+                    stimulipanel.PresentationFile = settings.PresentationFile;
+                    stimulipanel.TestFile = settings.TestFile;
+                    stimulipanel.AnsFile = settings.AnsFile;
+                }
+                else
+                    GUIUtils.Alert("Failed to load experiment info from " + openDialog.FileName, MessageBoxIcon.Error);
+
+            }, null, "Load a previously saved experiment settings file"));
+            //Put together the GUI
+            var rows = GUIUtils.CreateTable(new[] { .5, .2, .3 }, Direction.Vertical);
+            var col3 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
+
+            col3.Controls.Add(stimulipanel, 1, 0);
+            col3.Controls.Add(buttonTable, 0, 0);
+            rows.Controls.Add(col3, 0, 1);
+            rows.Controls.Add(startButton, 0, 2);
+            rows.Controls.Add(config, 0, 0);
+
+
+            this.Controls.Add(rows);
+
+
+            this.ResumeLayout(false);
+        }
+
+        //A private method for reading stimuli that uses \n as an indicator of a newline
+        private IArrayView<string> ReadTestStimuli(string path)
+        {
+            try
+            {
+                var lines = File.ReadAllLines(path);
+                var stimuli = lines.Select(s => s.Replace(@"\n", Environment.NewLine))
+                    .ToIArray();
+                return stimuli;
+            }
+            catch (Exception)
+            {
+                GUIUtils.Alert("Failed to Read File" + path);
+                return null;
+            }
+        }
+
 
         /// <summary>
         /// Builds the application view for the False Adaptive Application

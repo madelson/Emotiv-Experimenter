@@ -42,6 +42,7 @@ namespace MCAEmotiv.GUI.KRMonitor
             RandomizedQueue<string> usedPres = new RandomizedQueue<string>();
             pres.AddRange(presentation);
             using (var logWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "krmon_log_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".txt")))
+            using (var anslog = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "krmon_anslog_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".txt")))
             using (var dataWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "krmon_data_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".csv")))
             {
                 //Alternating Study and Test Phases
@@ -65,7 +66,7 @@ namespace MCAEmotiv.GUI.KRMonitor
                     a = numgen.Next(4, 13);
                     b = numgen.Next(4, 13);
 
-                    yield return new VocabView(string.Format("{0} x {1} = {2}", a, b, a * b), "Verify", settings.DisplayTime, settings.DelayTime, true, out result);
+                    yield return new VocabView(string.Format("{0} x {1} = {2}", a, b, a * b), "Verify", settings.DisplayTime, settings.DelayTime, true, anslog, out result);
 
                     yield return new ChoiceView(new string[] 
                 { 
@@ -78,7 +79,7 @@ namespace MCAEmotiv.GUI.KRMonitor
                     {
                         // listen for a broken connection
                         this.dataSource.AddListener(connectionListener);
-                        foreach (var view in this.GetViews(invoker, logWriter, dataWriter, i, pres))
+                        foreach (var view in this.GetViews(invoker, anslog, logWriter, dataWriter, i, pres))
                             if (connected)
                                 yield return view;
                             else
@@ -93,7 +94,7 @@ namespace MCAEmotiv.GUI.KRMonitor
             }
         }
 
-        private IEnumerable<View> GetViews(ISynchronizeInvoke invoker, StreamWriter logWriter, StreamWriter dataWriter, int round, RandomizedQueue<string> pres)
+        private IEnumerable<View> GetViews(ISynchronizeInvoke invoker, StreamWriter anslog, StreamWriter logWriter, StreamWriter dataWriter, int round, RandomizedQueue<string> pres)
         {
             var currentTrialEntries = new List<EEGDataEntry>();
             //To do: Save the date/time earlier and use it for both this and the dataWriter. Put it in GetEnumerator and pass to GetViews
@@ -126,7 +127,7 @@ namespace MCAEmotiv.GUI.KRMonitor
                     StudyTestPair currstp = stimulusPairs.RemoveRandom();
                     usedPairs.Add(currstp);
                     //logWriter.WriteLine("Question: " + currstp.index);
-                    foreach (var view in RunTrial(round, currstp.test, currstp.answer, currstp.index, dataWriter, logWriter, currentTrialEntries, pres))
+                    foreach (var view in RunTrial(round, currstp.test, currstp.answer, currstp.index, dataWriter, logWriter, anslog, currentTrialEntries, pres))
                     {
                         yield return view;
                     }
@@ -137,14 +138,14 @@ namespace MCAEmotiv.GUI.KRMonitor
         }
 
 
-        public IEnumerable<View> RunTrial(int index, string tst, string ans, int numstim, StreamWriter dataWriter, StreamWriter logWriter, List<EEGDataEntry> currentTrialEntries, RandomizedQueue<string> pres)
+        public IEnumerable<View> RunTrial(int index, string tst, string ans, int numstim, StreamWriter dataWriter, StreamWriter logWriter, StreamWriter anslog, List<EEGDataEntry> currentTrialEntries, RandomizedQueue<string> pres)
         {
             yield return new RestView(this.settings.BlinkTime);
             yield return new FixationView(this.settings.FixationTime);
             IViewResult result;
-            var vocabView = new VocabView(tst, ans, settings.DisplayTime, settings.DelayTime, false, out result);
+            var vocabView = new VocabView(tst, ans, settings.DisplayTime, settings.DelayTime, false, anslog, out result);
             vocabView.DoOnDeploy(c => this.dataSource.Marker = index+1);
-            //bool needToRerun = false;
+            bool noWrite = false;
 
             vocabView.DoOnFinishing(() =>
             {
@@ -154,8 +155,8 @@ namespace MCAEmotiv.GUI.KRMonitor
                     var trialsDuringDelay = currentTrialEntries.Where(e => e.RelativeTimeStamp <= settings.DelayTime);
                     if (this.settings.ArtifactDetectionSettings.HasMotionArtifact(trialsDuringDelay))
                     {
-                        logWriter.WriteLine("Motion Artifact Detected");
-                        //needToRerun = true;
+                        //logWriter.WriteLine("Motion Artifact Detected");
+                        noWrite = true;
                     }
                     else
                     {
@@ -180,8 +181,10 @@ namespace MCAEmotiv.GUI.KRMonitor
                 pres.Remove(tst + Environment.NewLine + ans);
                 towrite = 1;
             }
-            
-            logWriter.WriteLine(numstim + ", " + towrite);
+            if (!noWrite)
+            {
+                logWriter.WriteLine(numstim + ", " + towrite + ", " + index+1);
+            }
             //if (needToRerun)
             //{
             //    foreach (var view in RunTrial(index, tst, ans, dataWriter, logWriter, currentTrialEntries, pres))

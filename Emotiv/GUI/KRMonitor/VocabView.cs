@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using MCAEmotiv.GUI.Animation;
 using System.Windows.Forms;
+using System.IO;
 
 namespace MCAEmotiv.GUI.KRMonitor
 {
     class VocabView : MCAEmotiv.GUI.Animation.View
     {
-        public VocabView(string testStimulus, string correctAns, int displayTimeMillis, int delayTimeMillis, bool mchoice, out IViewResult result)
+        public VocabView(string testStimulus, string correctAns, int displayTimeMillis, int delayTimeMillis, bool mchoice, StreamWriter anslog, out IViewResult result)
             : base()
         {
             TextView test = new TextView(testStimulus, displayTimeMillis, GUIUtils.Constants.DISPLAY_FONT_LARGE); //-1 is infinite time
@@ -77,6 +78,8 @@ namespace MCAEmotiv.GUI.KRMonitor
                         this.SetResult(((string) frView.Result.Value) == correctAns);
                     else
                         this.SetResult(false);
+                    anslog.WriteLine("User Answer: " + (string)frView.Result.Value);
+                    anslog.WriteLine("Correct Answer: " + correctAns);
                 });
                 result = this.Result;
             }
