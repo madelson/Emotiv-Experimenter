@@ -53,6 +53,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Adaptive\FreeResponseView.cs" />
+    <Compile Include="Adaptive\StudyTestPair.cs" />
+    <Compile Include="Adaptive\VocabView.cs" />
     <Compile Include="Animation\Animator.cs" />
     <Compile Include="Animation\AbstractTimedView.cs" />
     <Compile Include="Animation\ChoiceView.cs" />
@@ -68,6 +71,11 @@
     <Compile Include="Animation\View.cs" />
     <Compile Include="Common\DisplayPointer.cs" />
     <Compile Include="Common\Extensions.cs" />
+    <Compile Include="Adaptive\AdaptiveProvider.cs" />
+    <Compile Include="Adaptive\AdaptiveSelectorPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Adaptive\AdaptiveSettings.cs" />
     <Compile Include="Test\TestProvider.cs" />
     <Compile Include="Test\TestSelectorPanel.cs">
       <SubType>Component</SubType>
@@ -170,6 +178,17 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="MLApp">
+      <Guid>{C36E46AB-6A81-457B-9F91-A7719A06287F}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

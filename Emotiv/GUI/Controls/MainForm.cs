@@ -13,6 +13,7 @@ using MCAEmotiv.Common;
 using MCAEmotiv.GUI.UserControlVocab;
 using MCAEmotiv.GUI.FalseAdapt;
 using MCAEmotiv.GUI.Test;
+using MCAEmotiv.GUI.Adaptive;
 
 namespace MCAEmotiv.GUI.Controls
 {
@@ -75,6 +76,143 @@ namespace MCAEmotiv.GUI.Controls
         }
 
         #region ---- Build View ----
+
+        /// <summary>
+        /// Builds the application view for the Adaptive Application
+        /// </summary>
+        public void BuildAdaptiveView()
+        {
+            this.SuspendLayout();
+            this.Text = GUIUtils.Strings.APP_NAME;
+            this.Size = new System.Drawing.Size(1500, 750);
+
+            //Settings panels
+            var config = ConfigurationPanel.Create<AdaptiveSettings>();
+            var artifactConfig = ConfigurationPanel.Create<ArtifactDetectionSettings>();
+            var stimulipanel = new AdaptiveSelectorPanel() { Dock = DockStyle.Fill };
+
+            //Headset Connected?
+            EmotivStatusCheckerPanel statusChecker = new EmotivStatusCheckerPanel() { Dock = DockStyle.Fill };
+
+            // start button
+            var startButton = GUIUtils.CreateFlatButton("Start Experiment", b =>
+            {
+                var settings = (AdaptiveSettings)config.GetConfiguredObject();
+                settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
+                var test = this.ReadAdaptStimuli(stimulipanel.TestFile);
+                var ans = this.ReadAdaptStimuli(stimulipanel.AnsFile);
+                //Make study-test pairs for practice phase
+                RandomizedQueue<MCAEmotiv.GUI.Adaptive.StudyTestPair> stp = new RandomizedQueue<MCAEmotiv.GUI.Adaptive.StudyTestPair>();
+                for (int i = 0; i < test.Count; i++)
+                {
+                    stp.Add(new MCAEmotiv.GUI.Adaptive.StudyTestPair(test[i], ans[i], i));
+                }
+                //To Do: Add a dialog box so that the user knows whether the headset is connected
+                IEEGDataSource dataSource;
+                if (statusChecker.HeadsetConnected)
+                {
+                    dataSource = EmotivDataSource.Instance;
+                }
+                else
+                    dataSource = new MockEEGDataSource();
+                this.Animate(new AdaptiveProvider(stp, settings, dataSource));
+            });
+
+            //Dialog boxes for saving and loading experiment settings
+            var saveDialog = new SaveFileDialog()
+            {
+                Title = "Save experiment settings",
+                Filter = "Experiment settings files|*.adaptsettings",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            };
+            var openDialog = new OpenFileDialog()
+            {
+                Title = "Select the saved experiment settings (.adaptsettings) file",
+                Filter = "Experiment settings files|*.adaptsettings",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                Multiselect = false
+            };
+
+            // button table for saving and loading experiment settings
+            var buttonTable = GUIUtils.CreateButtonTable(Direction.Horizontal, DockStyle.Fill,
+            GUIUtils.CreateFlatButton("Save", b =>
+            {
+                var settings = (AdaptiveSettings)config.GetConfiguredObject();
+                settings.TestFile = stimulipanel.TestFile;
+                settings.AnsFile = stimulipanel.AnsFile;
+                settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
+                saveDialog.FileName = string.IsNullOrWhiteSpace(settings.ExperimentName) ? "my experiment" : settings.ExperimentName;
+                if (saveDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                bool saved = settings.TrySerializeToFile(saveDialog.FileName);
+                GUIUtils.Alert((saved ? "Saved" : "Failed to save")
+                    + " experiment info to " + saveDialog.FileName,
+                    (saved ? MessageBoxIcon.Information : MessageBoxIcon.Error));
+
+                string directory = Path.GetDirectoryName(saveDialog.FileName);
+                if (Directory.Exists(directory))
+                    saveDialog.InitialDirectory = directory;
+            }, null, "Save experiment configuration information"),
+            GUIUtils.CreateFlatButton("Load", b =>
+            {
+                if (openDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                AdaptiveSettings settings;
+
+                if (Utils.TryDeserializeFile(openDialog.FileName, out settings))
+                {
+                    config.SetConfiguredObject(settings);
+                    stimulipanel.TestFile = settings.TestFile;
+                    stimulipanel.AnsFile = settings.AnsFile;
+                    artifactConfig.SetConfiguredObject(settings.ArtifactDetectionSettings);
+                }
+                else
+                    GUIUtils.Alert("Failed to load experiment info from " + openDialog.FileName, MessageBoxIcon.Error);
+
+            }, null, "Load a previously saved experiment settings file"));
+
+            //Put together the GUI
+            var rows = GUIUtils.CreateTable(new[] { .5, .2, .3 }, Direction.Vertical);
+            var col1 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
+            var col2 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
+            var col3 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
+
+            col2.Controls.Add(artifactConfig, 1, 0);
+            col1.Controls.Add(startButton, 1, 0);
+            col1.Controls.Add(statusChecker, 0, 0);
+            col2.Controls.Add(config, 0, 0);
+            col3.Controls.Add(stimulipanel, 1, 0);
+            col3.Controls.Add(buttonTable, 0, 0);
+            rows.Controls.Add(col3, 0, 1);
+            rows.Controls.Add(col1, 0, 2);
+            rows.Controls.Add(col2, 0, 0);
+
+
+            this.Controls.Add(rows);
+
+
+            this.ResumeLayout(false);
+        }
+
+        //A private method for reading stimuli that uses \n as an indicator of a newline
+        private IArrayView<string> ReadAdaptStimuli(string path)
+        {
+            try
+            {
+                var lines = File.ReadAllLines(path);
+                var stimuli = lines.Select(s => s.Replace(@"\n", Environment.NewLine))
+                    .ToIArray();
+                return stimuli;
+            }
+            catch (Exception)
+            {
+                GUIUtils.Alert("Failed to Read File" + path);
+                return null;
+            }
+        }
+
 
         /// <summary>
         /// Builds the application view for the Test Application
@@ -276,7 +414,7 @@ namespace MCAEmotiv.GUI.Controls
                 if (openDialog.ShowDialog() != DialogResult.OK)
                     return;
 
-                KRMonitorSettings settings;
+                FalseAdaptSettings settings;
 
                 if (Utils.TryDeserializeFile(openDialog.FileName, out settings))
                 {

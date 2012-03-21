@@ -52,8 +52,8 @@ namespace MCAEmotiv.GUI.FalseAdapt
                     VocabView vocabView = new VocabView(stimulus.test, stimulus.answer, this.settings.PresentationTime, this.settings.DelayTime,
                         false, out result);
                     yield return vocabView;
-                    yield return new TextView((bool)vocabView.Result.Value ? "Correct" : "Incorrect",
-                        this.settings.FeedbackTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                    //yield return new TextView((bool)vocabView.Result.Value ? "Correct" : "Incorrect",
+                    //    this.settings.FeedbackTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
                 }
             }
         }
