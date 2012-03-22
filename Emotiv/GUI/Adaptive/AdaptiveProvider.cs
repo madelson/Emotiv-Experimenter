@@ -107,14 +107,14 @@ namespace MCAEmotiv.GUI.Adaptive
                 {
                     double rand = numgen.NextDouble();
                     StudyTestPair stim;
-                    if (rand < .3)
+                    if (rand < .39)
                     {
                         if (!study.IsEmpty())
                         {
                             stim = study.RemoveRandom();
                             quiz.Add(stim);
                             logWriter.WriteLine("5");
-                            logWriter.WriteLine(stim.test + "\n" + stim.answer);
+                            logWriter.WriteLine(stim.test + "\\n" + stim.answer);
                             yield return new RestView(this.settings.BlinkTime);
                             yield return new TextView(stim.test + "\n" + stim.answer, this.settings.PresentationTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
                         }
@@ -137,7 +137,7 @@ namespace MCAEmotiv.GUI.Adaptive
                                 yield return view;
                         }
                     }
-                    else if (rand < .9)
+                    else if (rand < .99)
                     {
                         if (!quiz.IsEmpty())
                         {
@@ -153,7 +153,7 @@ namespace MCAEmotiv.GUI.Adaptive
                             stim = study.RemoveRandom();
                             quiz.Add(stim);
                             logWriter.WriteLine("5");
-                            logWriter.WriteLine(stim.test + "\n" + stim.answer);
+                            logWriter.WriteLine(stim.test + "\\n" + stim.answer);
                             yield return new RestView(this.settings.BlinkTime);
                             yield return new TextView(stim.test + "\n" + stim.answer, this.settings.PresentationTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
                         }
@@ -192,7 +192,7 @@ namespace MCAEmotiv.GUI.Adaptive
                             stim = study.RemoveRandom();
                             quiz.Add(stim);
                             logWriter.WriteLine("5");
-                            logWriter.WriteLine(stim.test + "\n" + stim.answer);
+                            logWriter.WriteLine(stim.test + "\\n" + stim.answer);
                             yield return new RestView(this.settings.BlinkTime);
                             yield return new TextView(stim.test + "\n" + stim.answer, this.settings.PresentationTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
                         }
@@ -213,7 +213,8 @@ namespace MCAEmotiv.GUI.Adaptive
             var vocabView = new VocabView(stim.test, stim.answer, settings.DisplayTime, settings.DelayTime, false, out result);
             vocabView.DoOnDeploy(c => this.dataSource.Marker = index + 1);
             bool noWrite = false;
-            int judge = 1;
+            double[] judge = {1};
+            double[] zro = {0};
             double newcomplevel = -1;
             vocabView.DoOnFinishing(() =>
             {
@@ -237,19 +238,27 @@ namespace MCAEmotiv.GUI.Adaptive
                             numentries++;
                         }
 
-                        double[][] data2matlab = new double[numentries][];
-                        double[][] zeros = new double[numentries][];
+                        //To do: figure out a better way to do this
+                        double[,] data2matlab = new double[numentries,15];
+                        double[,] zeros = new double[numentries,15];
                         int i = 0;
                         foreach (var entry in trialsDuringDelay)
                         {
-                            data2matlab[i] = new double[entry.Data.Count];
-                            int j = 0;
+                            //data2matlab[i, 0] = entry.Marker;
+                            //data2matlab[i, 1] = entry.TimeStamp;
+                            data2matlab[i, 0] = entry.RelativeTimeStamp;
+                            zeros[i, 0] = 0;
+                            //zeros[i, 1] = 0;
+                            //zeros[i, 2] = 0;
+                            int j = 1;
                             foreach (var set in entry.Data)
                             {
-                                data2matlab[i][j] = set;
-                                zeros[i][j] = 0.0;
+                                data2matlab[i,j] = set;
+                                zeros[i,j] = 0.0;
                                 j++;
                             }
+                            //data2matlab[i, 17] = stim.index;
+                            //zeros[i, 17] = 0;
                             i++;
                         }
 
@@ -258,8 +267,10 @@ namespace MCAEmotiv.GUI.Adaptive
                         double[] zero = { 0 };
                         matlab.PutFullMatrix("rating", "base", complev, zero);
                         matlab.Execute("cd c:\\Users\\Nicole\\Documents\\Matlab\\Thesis\\Adapt");
-                        matlab.Execute("[result rating] = adaptive(data)");
-                        judge = matlab.GetVariable("result", "base");
+                        //matlab.Execute("csvwrite('testing.csv', data)");
+                        matlab.Execute("[result rating] = adaptive(data, rating);");
+                        //matlab.Execute("csvwrite('othertest.csv', result)");
+                        matlab.GetFullMatrix("result", "base", judge, zro);
                         newcomplevel = matlab.GetVariable("rating", "base");
 
                     }
@@ -272,7 +283,7 @@ namespace MCAEmotiv.GUI.Adaptive
                 stim.complevel = newcomplevel;
                 if ((bool)result.Value)
                 {
-                    if (judge == 1)
+                    if (judge[0] == 1)
                     {
                         quiz.Add(stim);
                     }
