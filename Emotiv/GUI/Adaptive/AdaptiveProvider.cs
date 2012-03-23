@@ -225,6 +225,7 @@ namespace MCAEmotiv.GUI.Adaptive
                     if (this.settings.ArtifactDetectionSettings.HasMotionArtifact(trialsDuringDelay))
                     {
                         noWrite = true;
+                        quiz.Add(stim);
                     }
                     else
                     {

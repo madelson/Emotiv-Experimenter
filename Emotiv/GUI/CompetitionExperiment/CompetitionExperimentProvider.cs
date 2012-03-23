@@ -159,7 +159,9 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
             //Generate stimulus view
             var stimulusView = new TextView(stimulus, this.settings.DisplayTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
             stimulusView.DoOnDeploy(c => this.dataSource.Marker = cls);
-            //bool needToRerun = false;
+            bool needToRerun = false;
+            //HERE IT IS
+            bool feedback = true;
             //If there was a motion artifact, we need to rerun the trial with a different stimulus from the same class
             stimulusView.DoOnFinishing(() =>
             {
@@ -169,7 +171,8 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
                     if (this.settings.ArtifactDetectionSettings.HasMotionArtifact(currentTrialEntries))
                     {
                         logWriter.WriteLine("Motion Artifact Detected");
-                        // needToRerun = true;
+                        
+                         needToRerun = true;
                     }
                     else
                     {
@@ -189,7 +192,8 @@ namespace MCAEmotiv.GUI.CompetitionExperiment
             yield return stimulusView;
             yield return new TextView(stimulus + "*", settings.SpeakTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
             //Rerun if needed
-            //if (needToRerun)
+            if (needToRerun && feedback)
+                yield return new TextView("You moved!", 1000, GUIUtils.Constants.DISPLAY_FONT_LARGE);
             //{
             //    var stimulusClass = (cls == 1) ? this.class1 : this.class2;
             //    var stim = stimulusClass.Shuffled().First(s => s != stimulus);
