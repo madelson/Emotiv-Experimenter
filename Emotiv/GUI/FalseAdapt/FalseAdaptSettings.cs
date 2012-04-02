@@ -90,6 +90,18 @@ namespace MCAEmotiv.GUI.FalseAdapt
         [Parameter("Should " + GUIUtils.Strings.APP_NAME + " save labeled trial EEG data collected during the experiment?", DisplayName = "Save Trial Data", DefaultValue = false)]
         public bool SaveTrialData { get; set; }
 
+        /// <summary>
+        /// The number of images of each class dislplayed in training mode
+        /// </summary>
+        [Parameter("The number of images of each class dislplayed in a block", DisplayName = "Images Per Block", DefaultValue = 1, MinValue = 1)]
+        public int BlockSize { get; set; }
+
+        /// <summary>
+        /// The number of blocks of each class displayed during the Retrieval Practice Phase
+        /// </summary>
+        [Parameter("The number of blocks per class", DisplayName = "Number Blocks per Class", DefaultValue = 1, MinValue = 1)]
+        public int NumBlocks { get; set; }
+
         
         /// <summary>
         /// The folder where logs and data files are saved. Not a parameter
@@ -100,6 +112,27 @@ namespace MCAEmotiv.GUI.FalseAdapt
         /// The file from which Presentation stimuli are read. Not a parameter
         /// </summary>
         public string PresentationFile { get; set; }
+
+        /// <summary>
+        /// The file from which Study stimuli are read. Not a parameter
+        /// </summary>
+        public string StudyFile { get; set; }
+
+        /// <summary>
+        /// The file from which Presentation stimuli are read. Not a parameter
+        /// </summary>
+        public string CompFile { get; set; }
+
+        /// <summary>
+        /// The file from which Class 1 stimuli are read. Not a parameter
+        /// </summary>
+        public string Class1File { get; set; }
+
+        /// <summary>
+        /// The file from which Class 2 stimuli are read. Not a parameter
+        /// </summary>
+        public string Class2File { get; set; }
+
 
         /// <summary>
         /// The artifact detection settings object for the experiment. Not a parameter

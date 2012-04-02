@@ -361,6 +361,10 @@ namespace MCAEmotiv.GUI.Controls
                 var settings = (FalseAdaptSettings)config.GetConfiguredObject();
                 settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
                 var presentation = this.ReadFAStimuli(stimulipanel.PresentationFile);
+                var comp = this.ReadCompetitionStimuli(stimulipanel.CompFile);
+                var class1 = this.ReadCompetitionStimuli(stimulipanel.Class1File);
+                var class2 = this.ReadCompetitionStimuli(stimulipanel.Class2File);
+                var study = this.ReadUserStimuli(stimulipanel.StudyFile);
                 //Make study-test pairs for practice phase
                 RandomizedQueue<StudyTestTuple> stt = new RandomizedQueue<StudyTestTuple>();
                 for (int i = 0; i < presentation.Count; i++)
@@ -371,7 +375,7 @@ namespace MCAEmotiv.GUI.Controls
                         stt.Add(new StudyTestTuple(presentation[i + 1], presentation[i + 2], false));
                 }
                 
-                this.Animate(new FalseAdaptProvider(stt, settings));
+                this.Animate(new FalseAdaptProvider(stt, comp, class1, class2, study, settings));
             });
 
             //Dialog boxes for saving and loading experiment settings
@@ -395,6 +399,10 @@ namespace MCAEmotiv.GUI.Controls
             {
                 var settings = (FalseAdaptSettings)config.GetConfiguredObject();
                 settings.PresentationFile = stimulipanel.PresentationFile;
+                settings.StudyFile = stimulipanel.StudyFile;
+                settings.CompFile = stimulipanel.CompFile;
+                settings.Class1File = stimulipanel.Class1File;
+                settings.Class2File = stimulipanel.Class2File;
                 settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
                 saveDialog.FileName = string.IsNullOrWhiteSpace(settings.ExperimentName) ? "my experiment" : settings.ExperimentName;
                 if (saveDialog.ShowDialog() != DialogResult.OK)
@@ -420,6 +428,10 @@ namespace MCAEmotiv.GUI.Controls
                 {
                     config.SetConfiguredObject(settings);
                     stimulipanel.PresentationFile = settings.PresentationFile;
+                    stimulipanel.StudyFile = settings.StudyFile;
+                    stimulipanel.CompFile = settings.CompFile;
+                    stimulipanel.Class1File = settings.Class1File;
+                    stimulipanel.Class2File = settings.Class2File;
                     artifactConfig.SetConfiguredObject(settings.ArtifactDetectionSettings);
                 }
                 else
@@ -428,7 +440,7 @@ namespace MCAEmotiv.GUI.Controls
             }, null, "Load a previously saved experiment settings file"));
 
             //Put together the GUI
-            var rows = GUIUtils.CreateTable(new[] { .5, .2, .3 }, Direction.Vertical);
+            var rows = GUIUtils.CreateTable(new[] { .5, .3, .2 }, Direction.Vertical);
             var col1 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
             var col2 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
             var col3 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
@@ -489,15 +501,18 @@ namespace MCAEmotiv.GUI.Controls
                 var presentation = this.ReadUserStimuli(stimulipanel.PresentationFile);
                 var test = this.ReadUserStimuli(stimulipanel.TestFile);
                 var ans = this.ReadUserStimuli(stimulipanel.AnsFile);
+                var comp = this.ReadCompetitionStimuli(stimulipanel.CompFile);
+                var class1 = this.ReadCompetitionStimuli(stimulipanel.Class1File);
+                var class2 = this.ReadCompetitionStimuli(stimulipanel.Class2File);
                 //Make study-test pairs for the practice phase
                 RandomizedQueue<MCAEmotiv.GUI.UserControlVocab.StudyTestPair> stp = new RandomizedQueue<MCAEmotiv.GUI.UserControlVocab.StudyTestPair>();
                 for (int i = 0; i < test.Count; i++)
                 {
-                    stp.Add(new MCAEmotiv.GUI.UserControlVocab.StudyTestPair(test[i], ans[i]));
+                    stp.Add(new MCAEmotiv.GUI.UserControlVocab.StudyTestPair(test[i], ans[i], i));
                 }
                 if (presentation == null)
                     return;
-                this.Animate(new UserCtrlProvider(presentation, stp, settings));
+                this.Animate(new UserCtrlProvider(presentation, comp, class1, class2, stp, settings));
             });
 
             //Dialog boxes for saving and loading experiment settings
@@ -523,6 +538,9 @@ namespace MCAEmotiv.GUI.Controls
                 settings.PresentationFile = stimulipanel.PresentationFile;
                 settings.TestFile = stimulipanel.TestFile;
                 settings.AnsFile = stimulipanel.AnsFile;
+                settings.CompFile = stimulipanel.CompFile;
+                settings.Class1File = stimulipanel.Class1File;
+                settings.Class2File = stimulipanel.Class2File;
                 saveDialog.FileName = string.IsNullOrWhiteSpace(settings.ExperimentName) ? "my experiment" : settings.ExperimentName;
                 if (saveDialog.ShowDialog() != DialogResult.OK)
                     return;
@@ -549,6 +567,9 @@ namespace MCAEmotiv.GUI.Controls
                     stimulipanel.PresentationFile = settings.PresentationFile;
                     stimulipanel.TestFile = settings.TestFile;
                     stimulipanel.AnsFile = settings.AnsFile;
+                    stimulipanel.CompFile = settings.CompFile;
+                    stimulipanel.Class1File = settings.Class1File;
+                    stimulipanel.Class2File = settings.Class2File;
                 }
                 else
                     GUIUtils.Alert("Failed to load experiment info from " + openDialog.FileName, MessageBoxIcon.Error);
@@ -557,7 +578,7 @@ namespace MCAEmotiv.GUI.Controls
 
 
             //Put together the GUI
-            var rows = GUIUtils.CreateTable(new[] { .5, .2, .3 }, Direction.Vertical);
+            var rows = GUIUtils.CreateTable(new[] { .5, .35, .15 }, Direction.Vertical);
             var col3 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
 
             col3.Controls.Add(stimulipanel, 1, 0);

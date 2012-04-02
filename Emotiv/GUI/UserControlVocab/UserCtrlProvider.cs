@@ -17,14 +17,35 @@ namespace MCAEmotiv.GUI.UserControlVocab
         private readonly IArrayView<string> presentation;
         private readonly RandomizedQueue<StudyTestPair> stp;
         private readonly UserCtrlSettings settings;
-        //private readonly IEEGDataSource dataSource;
-        public UserCtrlProvider(IArrayView<string> presentation, RandomizedQueue<StudyTestPair> stp,
+        private readonly IArrayView<string> comp, class1, class2;
+        RandomizedQueue<string>[] blocks;
+        public UserCtrlProvider(IArrayView<string> presentation, IArrayView<string> comp, IArrayView<string> class1,
+            IArrayView<string> class2, RandomizedQueue<StudyTestPair> stp,
             UserCtrlSettings settings)//, IEEGDataSource dataSource)
         {
             this.presentation = presentation;
+            this.comp = comp;
+            this.class1 = class1;
+            this.class2 = class2;
             this.stp = stp;
             this.settings = settings;
-            //this.dataSource = dataSource;
+
+            blocks = new RandomizedQueue<string>[settings.NumBlocks * 2];
+            int limit = 0;
+            for (int i = 0; i < settings.NumBlocks * 2; i += 2)
+            {
+                blocks[i] = new RandomizedQueue<string>();
+                blocks[i + 1] = new RandomizedQueue<string>();
+
+                for (int j = 0 + limit * settings.BlockSize; j < (limit + 1) * settings.BlockSize; j++)
+                {
+                    blocks[i].Add(this.class1[j]);
+                    blocks[i + 1].Add(this.class2[j]);
+                }
+                limit++;
+
+            }
+
         }
         public string Title
         {
@@ -37,6 +58,43 @@ namespace MCAEmotiv.GUI.UserControlVocab
         public override IEnumerator<View> GetEnumerator()
         {
             IViewResult result;
+
+
+            yield return new ChoiceView(new string[] 
+                { 
+                    "Start Training Phase"
+                }, out result) { Text = "Click When Ready" };
+            for (int j = 0; j < comp.Count; j++)
+            {
+                yield return new TextView(comp[j], 3000, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                yield return new RestView(1500);
+            }
+            yield return new ChoiceView(new string[] 
+                { 
+                    "Begin Testing"
+                }, out result) { Text = "Click When Ready" };
+            //Display each block of stimuli
+            for (int j = 0; j < (settings.NumBlocks*2); j++)
+            {
+                
+                int limit = blocks[j].Count;
+                for (int k = 0; k < limit; k++)
+                {
+                    //Rest
+                    yield return new RestView(this.settings.BlinkTime);
+                    //Fixate
+                    yield return new FixationView(this.settings.FixationTime);
+                    var stimulus = blocks[j].RemoveRandom();
+                    //Generate stimulus view
+                    yield return new TextView(stimulus, 2000, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                    yield return new TextView(stimulus + "*", 1000, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                }
+                yield return new ChoiceView(new string[] 
+                {   
+                    "Ready for next block"
+                    }, out result);
+                }
+                
             RandomizedQueue<string> pres = new RandomizedQueue<string>();
             RandomizedQueue<string> usedPres = new RandomizedQueue<string>();
             RandomizedQueue<StudyTestPair> studySoon = new RandomizedQueue<StudyTestPair>();
@@ -57,8 +115,8 @@ namespace MCAEmotiv.GUI.UserControlVocab
                 usedPres.Add(stimulus);
             }
             pres.AddRange(usedPres);
-            using (var logWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "userctrl_log_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".txt")))
-            //using (var dataWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "userctrl_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".csv")))
+            using (var logWriterV = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "userctrl_logv_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".txt")))
+            using (var logWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "userctrl_log_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".csv")))
             {
 
                 yield return new ChoiceView(new string[] 
@@ -66,62 +124,36 @@ namespace MCAEmotiv.GUI.UserControlVocab
                     "Start Practice Phase"
                 }, out result) { Text = "Click When Ready" };
                 
-                //var connected = true; // assume it's connected
+                
                 using (var invoker = new SingleThreadedInvoker())
-                //using (var connectionListener = new EEGDataListener(invoker, s => connected = true, null, s => connected = false))
                 {
-                //    // listen for a broken connection
-                //    this.dataSource.AddListener(connectionListener);
-                    foreach (var view in this.GetViews(invoker, logWriter, //dataWriter, 
+                    foreach (var view in this.GetViews(invoker, logWriterV, logWriter, 
                         studySoon, testSoon, testLate))
-                //        if (connected)
+                
                             yield return view;
-                //        else
-                //        {
-                //            GUIUtils.Alert("Lost connection to headset!");
-                //            break;
-                //        }
-                //    this.dataSource.RemoveListener(connectionListener);
+                
                 }
 
             }
         }
 
-        private IEnumerable<View> GetViews(ISynchronizeInvoke invoker, StreamWriter logWriter, //StreamWriter dataWriter,
+        private IEnumerable<View> GetViews(ISynchronizeInvoke invoker, StreamWriter logWriterV, StreamWriter logWriter,
             RandomizedQueue<StudyTestPair> studySoon, RandomizedQueue<StudyTestPair> testSoon, RandomizedQueue<StudyTestPair> testLate)
         {
-            //var currentTrialEntries = new List<EEGDataEntry>();
-            //using (var artifactListener = new EEGDataListener(invoker, null, data =>
-            //{
-            //    foreach (var entry in data)
-            //    {
-            //        if (entry.HasStimulusMarker())
-            //        {
-            //            lock (currentTrialEntries)
-            //            {
-            //                currentTrialEntries.Add(entry);
-            //            }
-            //        }
-            //    }
-
-            //}, null))
-            //{
-            //    this.dataSource.AddListener(artifactListener);
-
-
+            
             //Presents stimuli from the three categories randomly with set probabilities
                 Random numgen = new Random();
 
                 for (int index = 0; index < settings.NumTrials; index++)
                 {
                     double choice = numgen.NextDouble();
-                    if ((choice < 0.1) && !testLate.IsEmpty())
+                    if ((choice < 0.05) && !testLate.IsEmpty())
                     {
                         StudyTestPair currstp = testLate.RemoveRandom();
-                        logWriter.WriteLine("Question: " + currstp.test);
-                        logWriter.WriteLine("Correct Answer: " + currstp.answer);
-                        foreach (var view in RunTrial(index, false, currstp.test, currstp.answer, //dataWriter, 
-                            logWriter, //currentTrialEntries, 
+                        logWriterV.WriteLine("Question: " + currstp.test);
+                        logWriterV.WriteLine("Correct Answer: " + currstp.answer);
+                        foreach (var view in RunTrial(index, false, currstp, logWriter, 
+                            logWriterV,
                             studySoon, testSoon, testLate))
                         {
                             yield return view;
@@ -130,11 +162,11 @@ namespace MCAEmotiv.GUI.UserControlVocab
                     else if ((choice < 0.4) && !studySoon.IsEmpty())
                     {
                         StudyTestPair study = studySoon.RemoveRandom();
-                        logWriter.WriteLine("Study Trial");
-                        logWriter.WriteLine(study.test);
-                        logWriter.WriteLine(study.answer);
-                        foreach (var view in RunTrial(index, true, study.test, study.answer, //dataWriter, 
-                            logWriter, //currentTrialEntries, 
+                        logWriterV.WriteLine("Study Trial");
+                        logWriterV.WriteLine(study.test);
+                        logWriterV.WriteLine(study.answer);
+                        foreach (var view in RunTrial(index, true, study, logWriter, 
+                            logWriterV, 
                             studySoon, testSoon, testLate))
                         {
                             yield return view;
@@ -143,10 +175,10 @@ namespace MCAEmotiv.GUI.UserControlVocab
                     else if (!testSoon.IsEmpty())
                     {
                         StudyTestPair currstp = testSoon.RemoveRandom();
-                        logWriter.WriteLine("Question: " + currstp.test);
-                        logWriter.WriteLine("Correct Answer: " + currstp.answer);
-                        foreach (var view in RunTrial(index, false, currstp.test, currstp.answer, //dataWriter, 
-                            logWriter, //currentTrialEntries, 
+                        logWriterV.WriteLine("Question: " + currstp.test);
+                        logWriterV.WriteLine("Correct Answer: " + currstp.answer);
+                        foreach (var view in RunTrial(index, false, currstp, logWriter, 
+                            logWriterV,
                             studySoon, testSoon, testLate))
                         {
                             yield return view;
@@ -161,8 +193,8 @@ namespace MCAEmotiv.GUI.UserControlVocab
         
 
 
-        public IEnumerable<View> RunTrial(int index, bool isStudy, string tst, string ans, // StreamWriter dataWriter, 
-            StreamWriter logWriter, //List<EEGDataEntry> currentTrialEntries, 
+        public IEnumerable<View> RunTrial(int index, bool isStudy, StudyTestPair stp, StreamWriter logWriter, 
+            StreamWriter logWriterV, //List<EEGDataEntry> currentTrialEntries, 
     RandomizedQueue<StudyTestPair> studySoon, 
             RandomizedQueue<StudyTestPair> testSoon, RandomizedQueue<StudyTestPair> testLate)
         {
@@ -172,46 +204,21 @@ namespace MCAEmotiv.GUI.UserControlVocab
             View vocabView;
             if (isStudy)
             {
-                vocabView = new TextView(tst + Environment.NewLine + ans, settings.DisplayTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                vocabView = new TextView(stp.test + Environment.NewLine + stp.answer, settings.DisplayTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
             }
             else
             {
-                vocabView = new VocabView(tst, ans, settings.DisplayTime, settings.DelayTime, false, out result);
+                vocabView = new VocabView(stp.test, stp.answer, settings.DisplayTime, settings.DelayTime, false, out result);
             }
-            //vocabView.DoOnDeploy(c => this.dataSource.Marker = index);
-            //bool needToRerun = false;
-            //ISSUE: first, the artifact detection should stop after the delay is over. Secondly, the artifact detection is throwing an
-            //exception (see comment keyphrase "THROWING EXCEPTION" in AnalysisExtensions.cs
-            //vocabView.DoOnFinishing(() =>
-            //{
-            //    this.dataSource.Marker = EEGDataEntry.MARKER_DEFAULT;
-            //    lock (currentTrialEntries)
-            //    {
-            //        if (this.settings.ArtifactDetectionSettings.HasMotionArtifact(currentTrialEntries))
-            //        {
-            //            logWriter.WriteLine("Motion Artifact Detected");
-            //            needToRerun = true;
-            //        }
-            //        else
-            //        {
-            //            if (this.settings.SaveTrialData)
-            //            {
-            //                foreach (var entry in currentTrialEntries)
-            //                {
-            //                    dataWriter.WriteLine(entry);
-            //                }
-            //            }
-
-            //        }
-            //        currentTrialEntries.Clear();
-            //    }
-            //});
+            
             yield return vocabView;
             //The user controls which group the stimulus goes into after the trial
-            StudyTestPair toAdd = new StudyTestPair(tst, ans);
+            StudyTestPair toAdd = stp; //new StudyTestPair(stp.test, stp.answer, stp.number);
             if (!isStudy)
             {
                 yield return new TextView((bool)vocabView.Result.Value ? "Correct" : "Incorrect", settings.FeedbackTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                int toWrite = (bool)vocabView.Result.Value ? 1 : 0;
+                logWriter.WriteLine(toAdd.number + ", " + toWrite);
                 string[] options = { "Study Soon", "Test Soon", "Test Later" };
                 ChoiceView choice = new ChoiceView(options);
                 yield return choice;
@@ -221,23 +228,15 @@ namespace MCAEmotiv.GUI.UserControlVocab
                     testSoon.Add(toAdd);
                 else
                     testLate.Add(toAdd);
-                logWriter.WriteLine("User Answer: " + vocabView.Result.Value);
-                logWriter.WriteLine("User Choice: " + choice.Result.Value);
+                logWriterV.WriteLine("User Answer: " + vocabView.Result.Value);
+                logWriterV.WriteLine("User Choice: " + choice.Result.Value);
             }
             else
             {
                 testSoon.Add(toAdd);
-                logWriter.WriteLine("Study Trial");
+                logWriterV.WriteLine("Study Trial");
             }
-//            if (needToRerun)
-//            {
-//                foreach (var view in RunTrial(index, isStudy, tst, ans, //dataWriter, 
-//logWriter, //currentTrialEntries, 
-//studySoon, testSoon, testLate))
-//                {
-//                    yield return view;
-//                }
-//            }
+
         }
 
     }

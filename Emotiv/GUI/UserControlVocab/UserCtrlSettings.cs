@@ -90,6 +90,18 @@ namespace MCAEmotiv.GUI.UserControlVocab
         [Parameter("Should " + GUIUtils.Strings.APP_NAME + " create a log of the experiment?", DisplayName = "Log Experiment", DefaultValue = false)]
         public bool LogExperiment { get; set; }
 
+        /// <summary>
+        /// The number of images of each class dislplayed in training mode
+        /// </summary>
+        [Parameter("The number of images of each class dislplayed in a block", DisplayName = "Images Per Block", DefaultValue = 1, MinValue = 1)]
+        public int BlockSize { get; set; }
+
+        /// <summary>
+        /// The number of blocks of each class displayed during the Retrieval Practice Phase
+        /// </summary>
+        [Parameter("The number of blocks per class", DisplayName = "Number Blocks per Class", DefaultValue = 1, MinValue = 1)]
+        public int NumBlocks { get; set; }
+
         ///// <summary>
         ///// Should the application save labeled trial EEG data collected during the experiment?
         ///// </summary>
@@ -121,6 +133,22 @@ namespace MCAEmotiv.GUI.UserControlVocab
         /// The file from which the answers to the Test stimuli are read. Not a parameter
         /// </summary>
         public string AnsFile { get; set; }
+
+        /// <summary>
+        /// The file from which Presentation stimuli are read. Not a parameter
+        /// </summary>
+        public string CompFile { get; set; }
+
+        /// <summary>
+        /// The file from which Class 1 stimuli are read. Not a parameter
+        /// </summary>
+        public string Class1File { get; set; }
+
+        /// <summary>
+        /// The file from which Class 2 stimuli are read. Not a parameter
+        /// </summary>
+        public string Class2File { get; set; }
+
 
         ///// <summary>
         ///// The artifact detection settings object for the experiment. Not a parameter

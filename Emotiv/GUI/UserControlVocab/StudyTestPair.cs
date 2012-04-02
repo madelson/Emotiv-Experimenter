@@ -10,10 +10,12 @@ namespace MCAEmotiv.GUI.UserControlVocab
     {
         public string test;
         public string answer;
-        public StudyTestPair(string tst, string ans)
+        public int number;
+        public StudyTestPair(string tst, string ans, int number)
         {
             this.test = tst;
             this.answer = ans;
+            this.number = number;
         }
     }
 }
