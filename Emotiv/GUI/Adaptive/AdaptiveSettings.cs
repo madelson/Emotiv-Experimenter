@@ -73,6 +73,12 @@ namespace MCAEmotiv.GUI.Adaptive
         public int FixationTime { get; set; }
 
         /// <summary>
+        /// The amount of time (in ms) for the subject to speak
+        /// </summary>
+        [Parameter("The amount of time (in ms) for the subject to speak", DisplayName = "Speak Time", DefaultValue = 1500, MinValue = 0)]
+        public int SpeakTime { get; set; }
+
+        /// <summary>
         /// The amount of time (in ms) for which the instructions are displayed
         /// </summary>
         [Parameter("The amount of time (in ms) for which the instructions are displayed", DisplayName = "Instruction Time", DefaultValue = 1500, MinValue = 0)]
@@ -83,6 +89,18 @@ namespace MCAEmotiv.GUI.Adaptive
         /// </summary>
         [Parameter("The number of Practice Rounds", DisplayName = "Number Rounds", DefaultValue= 100, MinValue = 1)]
         public int NumRounds {get; set; }
+
+        /// <summary>
+        /// The number of images of each class dislplayed in training mode
+        /// </summary>
+        [Parameter("The number of images of each class dislplayed in a block", DisplayName = "Images Per Block", DefaultValue = 1, MinValue = 1)]
+        public int BlockSize { get; set; }
+
+        /// <summary>
+        /// The number of blocks of each class displayed during the Retrieval Practice Phase
+        /// </summary>
+        [Parameter("The number of blocks per class", DisplayName = "Number Blocks per Class", DefaultValue = 1, MinValue = 1)]
+        public int NumBlocks { get; set; }
 
         /// <summary>
         /// Should the application create a log of the experiment?
@@ -113,6 +131,20 @@ namespace MCAEmotiv.GUI.Adaptive
         /// </summary>
         public string AnsFile { get; set; }
 
+        /// <summary>
+        /// The file from which Presentation stimuli are read. Not a parameter
+        /// </summary>
+        public string PresentationFile { get; set; }
+
+        /// <summary>
+        /// The file from which Class 1 stimuli are read. Not a parameter
+        /// </summary>
+        public string Class1File { get; set; }
+
+        /// <summary>
+        /// The file from which Class 2 stimuli are read. Not a parameter
+        /// </summary>
+        public string Class2File { get; set; }
         /// <summary>
         /// The artifact detection settings object for the experiment. Not a parameter
         /// </summary>

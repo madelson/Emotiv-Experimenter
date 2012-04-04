@@ -14,16 +14,36 @@ namespace MCAEmotiv.GUI.Adaptive
     class AdaptiveProvider : AbstractEnumerable<View>, IViewProvider
     {
         private readonly RandomizedQueue<StudyTestPair> pres;
+        private readonly IArrayView<string> presentation, class1, class2;
+        RandomizedQueue<string>[] blocks;
+        int numArtifacts = 0;
+        int numArt1 = 0;
+        int numArt2 = 0;
         private readonly AdaptiveSettings settings;
         private readonly IEEGDataSource dataSource;
         MLApp.MLApp matlab;
-        public AdaptiveProvider(RandomizedQueue<StudyTestPair> stp,
+        public AdaptiveProvider(RandomizedQueue<StudyTestPair> stp, IArrayView<string> presentation, IArrayView<string> class1, IArrayView<string> class2,
             AdaptiveSettings settings, IEEGDataSource dataSource)
         {
             this.pres = stp;
             this.settings = settings;
             this.dataSource = dataSource;
             matlab = new MLApp.MLApp();
+
+            blocks = new RandomizedQueue<string>[settings.NumBlocks * 2];
+            int limit = 0;
+            for (int i = 0; i < settings.NumBlocks * 2; i += 2)
+            {
+                blocks[i] = new RandomizedQueue<string>();
+                blocks[i + 1] = new RandomizedQueue<string>();
+
+                for (int j = 0 + limit * settings.BlockSize; j < (limit + 1) * settings.BlockSize; j++)
+                {
+                    blocks[i].Add(this.class1[j]);
+                    blocks[i + 1].Add(this.class2[j]);
+                }
+                limit++;
+            }
         }
         public string Title
         {
@@ -41,8 +61,50 @@ namespace MCAEmotiv.GUI.Adaptive
             RandomizedQueue<StudyTestPair> quiz = new RandomizedQueue<StudyTestPair>();
             RandomizedQueue<StudyTestPair> done = new RandomizedQueue<StudyTestPair>();
             using (var logWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "adapt_log_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".txt")))
-            using (var dataWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "adapt_data_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".csv")))
+            using (var dataWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "\\MATLAB\\Thesis\\Adapt\\adapt_data_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".csv")))
             {
+
+                yield return new ChoiceView(new string[] 
+                { 
+                "Ready for Training Study Phase"
+                }, out result);
+
+                //Present competition stimuli for study
+                for (int j = 0; j < presentation.Count; j++)
+                {
+                    yield return new TextView(presentation[j], this.settings.PresentationTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                    yield return new RestView(this.settings.RestTime);
+                }
+
+                //Begin the practice phase
+                yield return new ChoiceView(new string[] 
+                { 
+                "Start Training EEG Recording"
+                }, out result) { Text = "Click When Ready" };
+
+                var compconnected = true; // assume it's connected
+                using (var compinvoker = new SingleThreadedInvoker())
+                using (var compconnectionListener = new EEGDataListener(compinvoker, s => compconnected = true, null, s => compconnected = false))
+                {
+                    // listen for a broken connection
+                    this.dataSource.AddListener(compconnectionListener);
+                    foreach (var view in this.GetCompViews(compinvoker, logWriter, dataWriter))
+                        if (compconnected)
+                            yield return view;
+                        else
+                        {
+                            GUIUtils.Alert("Lost connection to headset!");
+                            break;
+                        }
+
+                    this.dataSource.RemoveListener(compconnectionListener);
+                }
+
+                //Check that the person has sufficient training data
+                if (numArt1 > 24 || numArt2 > 24)
+                    yield return new TextView("Error: Weeping Angel", settings.InstructionTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+
+                //CALL MATLAB TRAINING CODE HERE - HAVE IT READ THE DATA FILE
 
                 yield return new ChoiceView(new string[] 
                 { 
@@ -79,6 +141,98 @@ namespace MCAEmotiv.GUI.Adaptive
                     this.dataSource.RemoveListener(connectionListener);
                 }
 
+            }
+        }
+
+        //Generates the views by calling RunTrial
+        private IEnumerable<View> GetCompViews(ISynchronizeInvoke invoker, StreamWriter logWriter, StreamWriter dataWriter)
+        {
+            var currentCompTrialEntries = new List<EEGDataEntry>();
+            //To do: Save the date/time earlier and use it for both this and the dataWriter. Put it in GetEnumerator and pass to GetViews
+            using (var compartifactListener = new EEGDataListener(invoker, null, data =>
+            {
+                foreach (var entry in data)
+                {
+                    if (entry.HasStimulusMarker())
+                    {
+                        lock (currentCompTrialEntries)
+                        {
+                            currentCompTrialEntries.Add(entry);
+                        }
+                    }
+                }
+
+            }, null))
+            {
+                this.dataSource.AddListener(compartifactListener);
+                //Display each block of stimuli
+                for (int j = 0; j < settings.NumBlocks*2; j++)
+                {
+
+                    logWriter.WriteLine("Current Class: {0}, Block Number: {1}", (j % 2 + 1), j);
+                    //yield return new TextView("Current Class: " + block.cls, 2500, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                    IViewResult result;
+
+                    yield return new ChoiceView(new string[] 
+                {   
+                    "Ready for next block"
+                    }, out result);
+                    int limit = blocks[j].Count;
+                    for (int k = 0; k < limit; k++)
+                    {
+                        foreach (var view in RunCompTrial(blocks[j].RemoveRandom(), (j % 2 + 1), dataWriter, logWriter, currentCompTrialEntries))
+                            yield return view;
+                    }
+                    //blockCount++;
+                }
+                logWriter.WriteLine("Training Phase Concluded.");
+            }
+        }
+        public IEnumerable<View> RunCompTrial(string stimulus, int cls, StreamWriter dataWriter, StreamWriter logWriter, List<EEGDataEntry> currentTrialEntries)
+        {
+            //Rest
+            yield return new RestView(this.settings.BlinkTime);
+            //Fixate
+            yield return new FixationView(this.settings.FixationTime);
+            //Generate stimulus view
+            var stimulusView = new TextView(stimulus, this.settings.DisplayTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+            stimulusView.DoOnDeploy(c => this.dataSource.Marker = cls);
+            bool needToRerun = false;
+            stimulusView.DoOnFinishing(() =>
+            {
+                this.dataSource.Marker = EEGDataEntry.MARKER_DEFAULT;
+                lock (currentTrialEntries)
+                {
+                    if (this.settings.ArtifactDetectionSettings.HasMotionArtifact(currentTrialEntries))
+                    {
+                        logWriter.WriteLine("Motion Artifact Detected");
+
+                        needToRerun = true;
+                    }
+                    else
+                    {
+                        if (this.settings.SaveTrialData)
+                        {
+                            foreach (var entry in currentTrialEntries)
+                            {
+                                dataWriter.WriteLine(entry);
+                            }
+                        }
+
+                    }
+                    currentTrialEntries.Clear();
+                }
+            });
+            logWriter.WriteLine(stimulus);
+            yield return stimulusView;
+            yield return new TextView(stimulus + "*", settings.SpeakTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+            //Rerun if needed
+            if (needToRerun)
+            {
+                if (cls == 1)
+                    numArt1++;
+                if (cls == 2)
+                    numArt2++;
             }
         }
 
@@ -225,6 +379,7 @@ namespace MCAEmotiv.GUI.Adaptive
                     if (this.settings.ArtifactDetectionSettings.HasMotionArtifact(trialsDuringDelay))
                     {
                         noWrite = true;
+                        numArtifacts++;
                         quiz.Add(stim);
                     }
                     else
@@ -297,6 +452,11 @@ namespace MCAEmotiv.GUI.Adaptive
                 {
                     study.Add(stim);
                 }
+            }
+            if (numArtifacts > 10)
+            {
+                numArtifacts = 0;
+                yield return new TextView("Please keep face movements to a minimum", settings.InstructionTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
             }
         }
 

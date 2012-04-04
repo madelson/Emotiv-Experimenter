@@ -101,6 +101,9 @@ namespace MCAEmotiv.GUI.Controls
                 settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
                 var test = this.ReadAdaptStimuli(stimulipanel.TestFile);
                 var ans = this.ReadAdaptStimuli(stimulipanel.AnsFile);
+                var presentation = this.ReadCompetitionStimuli(stimulipanel.PresentationFile);
+                var class1 = this.ReadCompetitionStimuli(stimulipanel.Class1File);
+                var class2 = this.ReadCompetitionStimuli(stimulipanel.Class2File);
                 //Make study-test pairs for practice phase
                 RandomizedQueue<MCAEmotiv.GUI.Adaptive.StudyTestPair> stp = new RandomizedQueue<MCAEmotiv.GUI.Adaptive.StudyTestPair>();
                 for (int i = 0; i < test.Count; i++)
@@ -115,7 +118,7 @@ namespace MCAEmotiv.GUI.Controls
                 }
                 else
                     dataSource = new MockEEGDataSource();
-                this.Animate(new AdaptiveProvider(stp, settings, dataSource));
+                this.Animate(new AdaptiveProvider(stp, presentation, class1, class2, settings, dataSource));
             });
 
             //Dialog boxes for saving and loading experiment settings
@@ -140,6 +143,9 @@ namespace MCAEmotiv.GUI.Controls
                 var settings = (AdaptiveSettings)config.GetConfiguredObject();
                 settings.TestFile = stimulipanel.TestFile;
                 settings.AnsFile = stimulipanel.AnsFile;
+                settings.PresentationFile = stimulipanel.PresentationFile;
+                settings.Class1File = stimulipanel.Class1File;
+                settings.Class2File = stimulipanel.Class2File;
                 settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
                 saveDialog.FileName = string.IsNullOrWhiteSpace(settings.ExperimentName) ? "my experiment" : settings.ExperimentName;
                 if (saveDialog.ShowDialog() != DialogResult.OK)
@@ -166,6 +172,9 @@ namespace MCAEmotiv.GUI.Controls
                     config.SetConfiguredObject(settings);
                     stimulipanel.TestFile = settings.TestFile;
                     stimulipanel.AnsFile = settings.AnsFile;
+                    stimulipanel.PresentationFile = settings.PresentationFile;
+                    stimulipanel.Class1File = settings.Class1File;
+                    stimulipanel.Class2File = settings.Class2File;
                     artifactConfig.SetConfiguredObject(settings.ArtifactDetectionSettings);
                 }
                 else
