@@ -183,7 +183,7 @@ namespace MCAEmotiv.GUI.Controls
             }, null, "Load a previously saved experiment settings file"));
 
             //Put together the GUI
-            var rows = GUIUtils.CreateTable(new[] { .5, .2, .3 }, Direction.Vertical);
+            var rows = GUIUtils.CreateTable(new[] { .5, .35, .15 }, Direction.Vertical);
             var col1 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
             var col2 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
             var col3 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);

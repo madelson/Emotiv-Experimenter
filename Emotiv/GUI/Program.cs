@@ -26,10 +26,10 @@ namespace MCAEmotiv.GUI
             
             //MainForm.Instance.BuildExperimenterView();
             //MainForm.Instance.BuildKRMonitorView();
-            MainForm.Instance.BuildTestView();
+            //MainForm.Instance.BuildTestView();
             //MainForm.Instance.BuildUserCtrlView();
             //MainForm.Instance.BuildCompetitionExperimenterView();
-            //MainForm.Instance.BuildAdaptiveView();
+            MainForm.Instance.BuildAdaptiveView();
             //MainForm.Instance.BuildFAdaptView();
             Application.Run(MainForm.Instance);
             

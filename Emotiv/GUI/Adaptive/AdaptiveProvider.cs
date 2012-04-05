@@ -28,6 +28,9 @@ namespace MCAEmotiv.GUI.Adaptive
             this.pres = stp;
             this.settings = settings;
             this.dataSource = dataSource;
+            this.presentation = presentation;
+            this.class1 = class1;
+            this.class2 = class2;
             matlab = new MLApp.MLApp();
 
             blocks = new RandomizedQueue<string>[settings.NumBlocks * 2];
@@ -60,8 +63,9 @@ namespace MCAEmotiv.GUI.Adaptive
             RandomizedQueue<StudyTestPair> study = new RandomizedQueue<StudyTestPair>();
             RandomizedQueue<StudyTestPair> quiz = new RandomizedQueue<StudyTestPair>();
             RandomizedQueue<StudyTestPair> done = new RandomizedQueue<StudyTestPair>();
+            string filename = "adapt_data_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".csv";
             using (var logWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "adapt_log_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".txt")))
-            using (var dataWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "\\MATLAB\\Thesis\\Adapt\\adapt_data_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".csv")))
+            using (var dataWriter = new StreamWriter(Path.Combine("C:\\Users\\Nicole\\Documents\\MATLAB\\Thesis\\Adapt\\" + filename)))
             {
 
                 yield return new ChoiceView(new string[] 
@@ -104,7 +108,8 @@ namespace MCAEmotiv.GUI.Adaptive
                 if (numArt1 > 24 || numArt2 > 24)
                     yield return new TextView("Error: Weeping Angel", settings.InstructionTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
 
-                //CALL MATLAB TRAINING CODE HERE - HAVE IT READ THE DATA FILE
+                matlab.Execute("cd c:\\Users\\Nicole\\Documents\\Matlab\\Thesis\\Adapt");
+                matlab.Execute("coeff = train('" + filename + "');");
 
                 yield return new ChoiceView(new string[] 
                 { 
