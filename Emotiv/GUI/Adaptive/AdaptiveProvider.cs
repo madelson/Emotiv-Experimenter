@@ -109,7 +109,7 @@ namespace MCAEmotiv.GUI.Adaptive
                     yield return new TextView("Error: Weeping Angel", settings.InstructionTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
 
                 matlab.Execute("cd c:\\Users\\Nicole\\Documents\\Matlab\\Thesis\\Adapt");
-                matlab.Execute("coeff = train('" + filename + "');");
+                matlab.Execute("classifier = wekacomptrain('" + filename + "');");
 
                 yield return new ChoiceView(new string[] 
                 { 
@@ -427,9 +427,9 @@ namespace MCAEmotiv.GUI.Adaptive
                         double[] complev = { stim.complevel };
                         double[] zero = { 0 };
                         matlab.PutFullMatrix("rating", "base", complev, zero);
-                        matlab.Execute("cd c:\\Users\\Nicole\\Documents\\Matlab\\Thesis\\Adapt");
+                        matlab.Execute("cd c:\\Users\\Nicole\\Documents\\Matlab\\Thesis\\Adapt"); //might be unnecessary
                         //matlab.Execute("csvwrite('testing.csv', data)");
-                        matlab.Execute("[result rating] = adaptive(data, rating);");
+                        matlab.Execute("[result rating] = adaptive(data, false, classifier, rating);");
                         //matlab.Execute("csvwrite('othertest.csv', result)");
                         matlab.GetFullMatrix("result", "base", judge, zro);
                         newcomplevel = matlab.GetVariable("rating", "base");
