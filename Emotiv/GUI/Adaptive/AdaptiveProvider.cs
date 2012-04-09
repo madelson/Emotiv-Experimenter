@@ -110,7 +110,7 @@ namespace MCAEmotiv.GUI.Adaptive
                     yield return new TextView("Error: Weeping Angel", settings.InstructionTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
 
                 matlab.Execute("cd c:\\Users\\Nicole\\Documents\\Matlab\\Thesis\\Adapt");
-                matlab.Execute("classifier = wekacomptrain('" + filename + "');");
+                matlab.Execute("classifier = wekacomptrain('"+ filename + "');");
 
                 yield return new ChoiceView(new string[] 
                 { 
@@ -370,12 +370,13 @@ namespace MCAEmotiv.GUI.Adaptive
             yield return new RestView(this.settings.BlinkTime);
             yield return new FixationView(this.settings.FixationTime);
             IViewResult result;
+            logWriter.WriteLine("Trial: " + index);
             var vocabView = new VocabView(stim.test, stim.answer, settings.DisplayTime, settings.DelayTime, false, out result);
             vocabView.DoOnDeploy(c => this.dataSource.Marker = index + 1);
             bool noWrite = false;
             double[] judge = {1};
             double[] zro = {0};
-            double newcomplevel = -1;
+            double[] newcomplevel = {-1};
             vocabView.DoOnFinishing(() =>
             {
                 this.dataSource.Marker = EEGDataEntry.MARKER_DEFAULT;
@@ -400,7 +401,7 @@ namespace MCAEmotiv.GUI.Adaptive
                             numentries++;
                         }
 
-                        //To do: figure out a better way to do this
+                        
                         double[,] data2matlab = new double[numentries,15];
                         double[,] zeros = new double[numentries,15];
                         int i = 0;
@@ -431,9 +432,10 @@ namespace MCAEmotiv.GUI.Adaptive
                         matlab.Execute("cd c:\\Users\\Nicole\\Documents\\Matlab\\Thesis\\Adapt"); //might be unnecessary
                         //matlab.Execute("csvwrite('testing.csv', data)");
                         matlab.Execute("[result rating] = adaptive(data, false, classifier, rating);");
-                        //matlab.Execute("csvwrite('othertest.csv', result)");
+                        //matlab.Execute("csvwrite('meow.csv', result)");
                         matlab.GetFullMatrix("result", "base", judge, zro);
-                        newcomplevel = matlab.GetVariable("rating", "base");
+                        //matlab.Execute("csvwrite('ROAR.csv', rating)");
+                        matlab.GetFullMatrix("rating", "base", newcomplevel, zro);
 
                     }
                     currentTrialEntries.Clear();
@@ -442,10 +444,12 @@ namespace MCAEmotiv.GUI.Adaptive
             yield return vocabView;
             if (!noWrite)
             {
-                stim.complevel = newcomplevel;
+                
                 if ((bool)result.Value)
                 {
-                    if (judge[0] == 1)
+                    if (stim.complevel < 0)
+                        stim.complevel = newcomplevel[0];
+                    if (judge[0] == 0)
                     {
                         quiz.Add(stim);
                     }
