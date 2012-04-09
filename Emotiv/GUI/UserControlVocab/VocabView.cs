@@ -9,6 +9,54 @@ namespace MCAEmotiv.GUI.UserControlVocab
 {
     class VocabView : MCAEmotiv.GUI.Animation.View
     {
+        /// <summary>
+        /// Compute the distance between two strings.
+        /// </summary>
+        private int Compute(string s, string t)
+        {
+            int n = s.Length;
+            int m = t.Length;
+            int[,] d = new int[n + 1, m + 1];
+
+            // Step 1
+            if (n == 0)
+            {
+                return m;
+            }
+
+            if (m == 0)
+            {
+                return n;
+            }
+
+            // Step 2
+            for (int i = 0; i <= n; d[i, 0] = i++)
+            {
+            }
+
+            for (int j = 0; j <= m; d[0, j] = j++)
+            {
+            }
+
+            // Step 3
+            for (int i = 1; i <= n; i++)
+            {
+                //Step 4
+                for (int j = 1; j <= m; j++)
+                {
+                    // Step 5
+                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
+
+                    // Step 6
+                    d[i, j] = Math.Min(
+                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                        d[i - 1, j - 1] + cost);
+                }
+            }
+            // Step 7
+            return d[n, m];
+        }
+
         public VocabView(string testStimulus, string correctAns, int displayTimeMillis, int delayTimeMillis, bool mchoice, out IViewResult result)
             : base()
         {
@@ -73,7 +121,15 @@ namespace MCAEmotiv.GUI.UserControlVocab
                 this.DoOnFinishing(() =>
                 {
                     if (frView.Result.HasValue)
-                        this.SetResult(((string) frView.Result.Value) == correctAns);
+                        if (Compute((string)frView.Result.Value, correctAns) < 3)
+                            if ((correctAns == "MONKEY" && (string) frView.Result.Value == "DONKEY") || (correctAns == "DONKEY" && (string) frView.Result.Value == "MONKEY"))
+                                this.SetResult(false);
+                            else if (correctAns == "MANGO" || correctAns == "MAGGOT" || correctAns == "HORSE" || correctAns == "CORPSE")
+                                this.SetResult(Compute((string)frView.Result.Value, correctAns) < 2);
+                            else
+                                this.SetResult(true);
+                        else
+                            this.SetResult(false);
                     else
                         this.SetResult(false);
                 });

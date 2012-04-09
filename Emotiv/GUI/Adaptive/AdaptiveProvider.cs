@@ -48,6 +48,7 @@ namespace MCAEmotiv.GUI.Adaptive
                 limit++;
             }
         }
+
         public string Title
         {
             get { return "New Adaptive Experiment"; }

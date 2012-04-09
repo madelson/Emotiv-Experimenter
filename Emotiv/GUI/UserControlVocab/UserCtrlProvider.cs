@@ -66,8 +66,8 @@ namespace MCAEmotiv.GUI.UserControlVocab
                 }, out result) { Text = "Click When Ready" };
             for (int j = 0; j < comp.Count; j++)
             {
-                yield return new TextView(comp[j], 3000, GUIUtils.Constants.DISPLAY_FONT_LARGE);
-                yield return new RestView(1500);
+                yield return new TextView(comp[j], settings.PresentationTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                yield return new RestView(settings.RestTime);
             }
             yield return new ChoiceView(new string[] 
                 { 
@@ -86,8 +86,8 @@ namespace MCAEmotiv.GUI.UserControlVocab
                     yield return new FixationView(this.settings.FixationTime);
                     var stimulus = blocks[j].RemoveRandom();
                     //Generate stimulus view
-                    yield return new TextView(stimulus, 2000, GUIUtils.Constants.DISPLAY_FONT_LARGE);
-                    yield return new TextView(stimulus + "*", 1000, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                    yield return new TextView(stimulus, settings.PresentationTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                    yield return new TextView(stimulus + "*", settings.PresentationTime/2, GUIUtils.Constants.DISPLAY_FONT_LARGE);
                 }
                 yield return new ChoiceView(new string[] 
                 {   
@@ -147,7 +147,7 @@ namespace MCAEmotiv.GUI.UserControlVocab
                 for (int index = 0; index < settings.NumTrials; index++)
                 {
                     double choice = numgen.NextDouble();
-                    if ((choice < 0.05) && !testLate.IsEmpty())
+                    if ((choice < 0.01) && !testLate.IsEmpty())
                     {
                         StudyTestPair currstp = testLate.RemoveRandom();
                         logWriterV.WriteLine("Question: " + currstp.test);
@@ -198,7 +198,9 @@ namespace MCAEmotiv.GUI.UserControlVocab
     RandomizedQueue<StudyTestPair> studySoon, 
             RandomizedQueue<StudyTestPair> testSoon, RandomizedQueue<StudyTestPair> testLate)
         {
-            yield return new RestView(this.settings.BlinkTime);
+            //yield return new RestView(this.settings.BlinkTime);
+            int trialnumber = index + 1;
+            yield return new TextView("Trial number: " + trialnumber, this.settings.BlinkTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
             yield return new FixationView(this.settings.FixationTime);
             IViewResult result;
             View vocabView;
