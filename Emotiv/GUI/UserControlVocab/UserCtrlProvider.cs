@@ -147,45 +147,126 @@ namespace MCAEmotiv.GUI.UserControlVocab
                 for (int index = 0; index < settings.NumTrials; index++)
                 {
                     double choice = numgen.NextDouble();
-                    if ((choice < 0.01) && !testLate.IsEmpty())
+                    if (choice < 0.01)
                     {
-                        StudyTestPair currstp = testLate.RemoveRandom();
-                        logWriterV.WriteLine("Question: " + currstp.test);
-                        logWriterV.WriteLine("Correct Answer: " + currstp.answer);
-                        foreach (var view in RunTrial(index, false, currstp, logWriter, 
-                            logWriterV,
-                            studySoon, testSoon, testLate))
+                        if (!testLate.IsEmpty())
                         {
-                            yield return view;
+                            StudyTestPair currstp = testLate.RemoveRandom();
+                            logWriterV.WriteLine("Question: " + currstp.test);
+                            logWriterV.WriteLine("Correct Answer: " + currstp.answer);
+                            foreach (var view in RunTrial(index, false, currstp, logWriter,
+                                logWriterV,
+                                studySoon, testSoon, testLate))
+                            {
+                                yield return view;
+                            }
+                        }
+                        else if (!studySoon.IsEmpty())
+                        {
+                            StudyTestPair study = studySoon.RemoveRandom();
+                            logWriterV.WriteLine("Study Trial");
+                            logWriterV.WriteLine(study.test);
+                            logWriterV.WriteLine(study.answer);
+                            foreach (var view in RunTrial(index, true, study, logWriter,
+                                logWriterV,
+                                studySoon, testSoon, testLate))
+                            {
+                                yield return view;
+                            }
+                        }
+                        else
+                        {
+                            StudyTestPair currstp = testSoon.RemoveRandom();
+                            logWriterV.WriteLine("Question: " + currstp.test);
+                            logWriterV.WriteLine("Correct Answer: " + currstp.answer);
+                            foreach (var view in RunTrial(index, false, currstp, logWriter,
+                                logWriterV,
+                                studySoon, testSoon, testLate))
+                            {
+                                yield return view;
+                            }
                         }
                     }
-                    else if ((choice < 0.4) && !studySoon.IsEmpty())
+                    else if (choice < 0.4)
                     {
-                        StudyTestPair study = studySoon.RemoveRandom();
-                        logWriterV.WriteLine("Study Trial");
-                        logWriterV.WriteLine(study.test);
-                        logWriterV.WriteLine(study.answer);
-                        foreach (var view in RunTrial(index, true, study, logWriter, 
-                            logWriterV, 
-                            studySoon, testSoon, testLate))
+                        if (!studySoon.IsEmpty())
                         {
-                            yield return view;
+                            StudyTestPair study = studySoon.RemoveRandom();
+                            logWriterV.WriteLine("Study Trial");
+                            logWriterV.WriteLine(study.test);
+                            logWriterV.WriteLine(study.answer);
+                            foreach (var view in RunTrial(index, true, study, logWriter,
+                                logWriterV,
+                                studySoon, testSoon, testLate))
+                            {
+                                yield return view;
+                            }
+                        }
+                        else if (!testSoon.IsEmpty())
+                        {
+                            StudyTestPair currstp = testSoon.RemoveRandom();
+                            logWriterV.WriteLine("Question: " + currstp.test);
+                            logWriterV.WriteLine("Correct Answer: " + currstp.answer);
+                            foreach (var view in RunTrial(index, false, currstp, logWriter,
+                                logWriterV,
+                                studySoon, testSoon, testLate))
+                            {
+                                yield return view;
+                            }
+                        }
+                        else
+                        {
+                            StudyTestPair currstp = testLate.RemoveRandom();
+                            logWriterV.WriteLine("Question: " + currstp.test);
+                            logWriterV.WriteLine("Correct Answer: " + currstp.answer);
+                            foreach (var view in RunTrial(index, false, currstp, logWriter,
+                                logWriterV,
+                                studySoon, testSoon, testLate))
+                            {
+                                yield return view;
+                            }
                         }
                     }
-                    else if (!testSoon.IsEmpty())
+                    else 
                     {
-                        StudyTestPair currstp = testSoon.RemoveRandom();
-                        logWriterV.WriteLine("Question: " + currstp.test);
-                        logWriterV.WriteLine("Correct Answer: " + currstp.answer);
-                        foreach (var view in RunTrial(index, false, currstp, logWriter, 
-                            logWriterV,
-                            studySoon, testSoon, testLate))
+                        if (!testSoon.IsEmpty())
                         {
-                            yield return view;
+                            StudyTestPair currstp = testSoon.RemoveRandom();
+                            logWriterV.WriteLine("Question: " + currstp.test);
+                            logWriterV.WriteLine("Correct Answer: " + currstp.answer);
+                            foreach (var view in RunTrial(index, false, currstp, logWriter,
+                                logWriterV,
+                                studySoon, testSoon, testLate))
+                            {
+                                yield return view;
+                            }
+                        }
+                        else if (!studySoon.IsEmpty())
+                        {
+                            StudyTestPair study = studySoon.RemoveRandom();
+                            logWriterV.WriteLine("Study Trial");
+                            logWriterV.WriteLine(study.test);
+                            logWriterV.WriteLine(study.answer);
+                            foreach (var view in RunTrial(index, true, study, logWriter,
+                                logWriterV,
+                                studySoon, testSoon, testLate))
+                            {
+                                yield return view;
+                            }
+                        }
+                        else
+                        {
+                            StudyTestPair currstp = testLate.RemoveRandom();
+                            logWriterV.WriteLine("Question: " + currstp.test);
+                            logWriterV.WriteLine("Correct Answer: " + currstp.answer);
+                            foreach (var view in RunTrial(index, false, currstp, logWriter,
+                                logWriterV,
+                                studySoon, testSoon, testLate))
+                            {
+                                yield return view;
+                            }
                         }
                     }
-                    else
-                        yield break;
 
 
                 }
