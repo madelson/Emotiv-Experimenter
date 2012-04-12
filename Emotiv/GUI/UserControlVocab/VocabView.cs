@@ -120,7 +120,7 @@ namespace MCAEmotiv.GUI.UserControlVocab
                 });
                 this.DoOnFinishing(() =>
                 {
-                    if (frView.Result.HasValue)
+                    if (frView.Result.HasValue && (string) frView.Result.Value != "")
                         if (Compute((string)frView.Result.Value, correctAns) < 3)
                             if ((correctAns == "MONKEY" && (string) frView.Result.Value == "DONKEY") || (correctAns == "DONKEY" && (string) frView.Result.Value == "MONKEY"))
                                 this.SetResult(false);

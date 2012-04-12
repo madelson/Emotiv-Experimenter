@@ -19,6 +19,7 @@ namespace MCAEmotiv.GUI.Adaptive
         int numArtifacts = 0;
         int numArt1 = 0;
         int numArt2 = 0;
+        int numArt = 0;
         private readonly AdaptiveSettings settings;
         private readonly IEEGDataSource dataSource;
         MLApp.MLApp matlab;
@@ -239,6 +240,12 @@ namespace MCAEmotiv.GUI.Adaptive
                     numArt1++;
                 if (cls == 2)
                     numArt2++;
+                numArt++;
+            }
+            if (numArt > 12)
+            {
+                numArt = 0;
+                yield return new TextView("Please keep face movements to a minimum", settings.InstructionTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
             }
         }
 
@@ -387,7 +394,6 @@ namespace MCAEmotiv.GUI.Adaptive
                     {
                         noWrite = true;
                         numArtifacts++;
-                        quiz.Add(stim);
                     }
                     else
                     {
@@ -432,9 +438,9 @@ namespace MCAEmotiv.GUI.Adaptive
                         matlab.Execute("cd c:\\Users\\Nicole\\Documents\\Matlab\\Thesis\\Adapt"); //might be unnecessary
                         //matlab.Execute("csvwrite('testing.csv', data)");
                         matlab.Execute("[result rating] = adaptive(data, false, classifier, rating);");
-                        //matlab.Execute("csvwrite('meow.csv', result)");
+                       // matlab.Execute("csvwrite('ARGH.csv', result)");
                         matlab.GetFullMatrix("result", "base", judge, zro);
-                        //matlab.Execute("csvwrite('ROAR.csv', rating)");
+                       // matlab.Execute("csvwrite('ROAR.csv', rating)");
                         matlab.GetFullMatrix("rating", "base", newcomplevel, zro);
 
                     }
@@ -444,7 +450,7 @@ namespace MCAEmotiv.GUI.Adaptive
             yield return vocabView;
             if (!noWrite)
             {
-                
+
                 if ((bool)result.Value)
                 {
                     if (stim.complevel < 0)
@@ -462,6 +468,18 @@ namespace MCAEmotiv.GUI.Adaptive
                 {
                     study.Add(stim);
                 }
+            }
+            else
+            {
+                if ((bool)result.Value)
+                {
+                        quiz.Add(stim);
+                }
+                else
+                {
+                    study.Add(stim);
+                }
+
             }
             if (numArtifacts > 10)
             {
