@@ -81,8 +81,8 @@ namespace MCAEmotiv.GUI.FalseAdapt
                     yield return new FixationView(this.settings.FixationTime);
                     var stimulus = blocks[j].RemoveRandom();
                     //Generate stimulus view
-                    yield return new TextView(stimulus, 200, GUIUtils.Constants.DISPLAY_FONT_LARGE);
-                    yield return new TextView(stimulus + "*", 100, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                    yield return new TextView(stimulus, 2000, GUIUtils.Constants.DISPLAY_FONT_LARGE);
+                    yield return new TextView(stimulus + "*", 1000, GUIUtils.Constants.DISPLAY_FONT_LARGE);
                 }
                 yield return new ChoiceView(new string[] 
                 {   

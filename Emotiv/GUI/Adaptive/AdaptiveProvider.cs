@@ -8,6 +8,7 @@ using MCAEmotiv.Interop;
 using MCAEmotiv.Common;
 using System.IO;
 using System.ComponentModel;
+using MCAEmotiv.GUI.Configurations;
 
 namespace MCAEmotiv.GUI.Adaptive
 {
@@ -22,9 +23,12 @@ namespace MCAEmotiv.GUI.Adaptive
         int numArt = 0;
         private readonly AdaptiveSettings settings;
         private readonly IEEGDataSource dataSource;
-        MLApp.MLApp matlab;
+        private readonly IArray<ClassificationScheme> classifiers;
+        private readonly ClassifierManager classifier;
+        //MATLAB REFERENCE. You must add the matlab reference via the project menu before this will work
+        //MLApp.MLApp matlab;
         public AdaptiveProvider(RandomizedQueue<StudyTestPair> stp, IArrayView<string> presentation, IArrayView<string> class1, IArrayView<string> class2,
-            AdaptiveSettings settings, IEEGDataSource dataSource)
+            AdaptiveSettings settings, IEEGDataSource dataSource, IArray<ClassificationScheme> classifiers)
         {
             this.pres = stp;
             this.settings = settings;
@@ -32,7 +36,12 @@ namespace MCAEmotiv.GUI.Adaptive
             this.presentation = presentation;
             this.class1 = class1;
             this.class2 = class2;
-            matlab = new MLApp.MLApp();
+            this.classifiers = classifiers;
+            //NOTE: It will always take the first classification scheme chosen
+            //TODO: Make it so that only one classification scheme can be specified
+            classifier = new ClassifierManager(classifiers[0]);
+            //MATLAB REFERENCE
+            //matlab = new MLApp.MLApp();
 
             blocks = new RandomizedQueue<string>[settings.NumBlocks * 2];
             int limit = 0;
@@ -110,8 +119,9 @@ namespace MCAEmotiv.GUI.Adaptive
                 if (numArt1 > 24 || numArt2 > 24)
                     yield return new TextView("Error: Weeping Angel", settings.InstructionTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
 
-                matlab.Execute("cd c:\\Users\\Nicole\\Documents\\Matlab\\Thesis\\Adapt");
-                matlab.Execute("classifier = wekacomptrain('"+ filename + "');");
+                //MATLAB REFERENCE
+                //matlab.Execute("cd c:\\Users\\Nicole\\Documents\\Matlab\\Thesis\\Adapt");
+                //matlab.Execute("classifier = wekacomptrain('"+ filename + "');");
 
                 yield return new ChoiceView(new string[] 
                 { 
@@ -223,8 +233,11 @@ namespace MCAEmotiv.GUI.Adaptive
                             foreach (var entry in currentTrialEntries)
                             {
                                 dataWriter.WriteLine(entry);
+
                             }
                         }
+                        //PROBLEM: do not know how to convert here.
+                        //classifier.AddTrial(currentTrialEntries.ToIArray<EEGDataEntry>);
 
                     }
                     currentTrialEntries.Clear();
@@ -233,7 +246,7 @@ namespace MCAEmotiv.GUI.Adaptive
             logWriter.WriteLine(stimulus);
             yield return stimulusView;
             yield return new TextView(stimulus + "*", settings.SpeakTime, GUIUtils.Constants.DISPLAY_FONT_LARGE);
-            //Rerun if needed
+            //Check number of artifacts
             if (needToRerun)
             {
                 if (cls == 1)
@@ -407,41 +420,34 @@ namespace MCAEmotiv.GUI.Adaptive
                             numentries++;
                         }
 
-                        
-                        double[,] data2matlab = new double[numentries,15];
-                        double[,] zeros = new double[numentries,15];
-                        int i = 0;
+                        //MATLAB REFERENCE
+                        //double[,] data2matlab = new double[numentries,15];
+                        //double[,] zeros = new double[numentries,15];
+                        //int i = 0;
                         foreach (var entry in trialsDuringDelay)
                         {
-                            //data2matlab[i, 0] = entry.Marker;
-                            //data2matlab[i, 1] = entry.TimeStamp;
-                            data2matlab[i, 0] = entry.RelativeTimeStamp;
-                            zeros[i, 0] = 0;
-                            //zeros[i, 1] = 0;
-                            //zeros[i, 2] = 0;
-                            int j = 1;
-                            foreach (var set in entry.Data)
-                            {
-                                data2matlab[i,j] = set;
-                                zeros[i,j] = 0.0;
-                                j++;
-                            }
-                            //data2matlab[i, 17] = stim.index;
-                            //zeros[i, 17] = 0;
-                            i++;
+                            //MATLAB REFERENCE
+                            //data2matlab[i, 0] = entry.RelativeTimeStamp;
+                            //zeros[i, 0] = 0;
+                            
+                            //int j = 1;
+                            //foreach (var set in entry.Data)
+                            //{
+                            //    data2matlab[i,j] = set;
+                            //    zeros[i,j] = 0.0;
+                            //    j++;
+                            //}
+                            //i++;
                         }
-
-                        matlab.PutFullMatrix("data", "base", data2matlab, zeros);
-                        double[] complev = { stim.complevel };
-                        double[] zero = { 0 };
-                        matlab.PutFullMatrix("rating", "base", complev, zero);
-                        matlab.Execute("cd c:\\Users\\Nicole\\Documents\\Matlab\\Thesis\\Adapt"); //might be unnecessary
-                        //matlab.Execute("csvwrite('testing.csv', data)");
-                        matlab.Execute("[result rating] = adaptive(data, false, classifier, rating);");
-                       // matlab.Execute("csvwrite('ARGH.csv', result)");
-                        matlab.GetFullMatrix("result", "base", judge, zro);
-                       // matlab.Execute("csvwrite('ROAR.csv', rating)");
-                        matlab.GetFullMatrix("rating", "base", newcomplevel, zro);
+                        //MATLAB REFERENCE
+                        //matlab.PutFullMatrix("data", "base", data2matlab, zeros);
+                        //double[] complev = { stim.complevel };
+                        //double[] zero = { 0 };
+                        //matlab.PutFullMatrix("rating", "base", complev, zero);
+                        //matlab.Execute("cd c:\\Users\\Nicole\\Documents\\Matlab\\Thesis\\Adapt"); //might be unnecessary
+                        //matlab.Execute("[result rating] = adaptive(data, false, classifier, rating);");
+                        //matlab.GetFullMatrix("result", "base", judge, zro);
+                        //matlab.GetFullMatrix("rating", "base", newcomplevel, zro);
 
                     }
                     currentTrialEntries.Clear();

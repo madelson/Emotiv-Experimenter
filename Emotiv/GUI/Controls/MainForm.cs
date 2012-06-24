@@ -88,8 +88,10 @@ namespace MCAEmotiv.GUI.Controls
 
             //Settings panels
             var config = ConfigurationPanel.Create<AdaptiveSettings>();
-            var artifactConfig = ConfigurationPanel.Create<ArtifactDetectionSettings>();
+            //var artifactConfig = ConfigurationPanel.Create<ArtifactDetectionSettings>();
             var stimulipanel = new AdaptiveSelectorPanel() { Dock = DockStyle.Fill };
+            // classifier settings
+            var classifierPanel = new ClassificationSchemePanel() { Dock = DockStyle.Fill };
 
             //Headset Connected?
             EmotivStatusCheckerPanel statusChecker = new EmotivStatusCheckerPanel() { Dock = DockStyle.Fill };
@@ -98,7 +100,8 @@ namespace MCAEmotiv.GUI.Controls
             var startButton = GUIUtils.CreateFlatButton("Start Experiment", b =>
             {
                 var settings = (AdaptiveSettings)config.GetConfiguredObject();
-                settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
+                //settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
+                settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)classifierPanel.ArtifactDetectionSettings;
                 var test = this.ReadAdaptStimuli(stimulipanel.TestFile);
                 var ans = this.ReadAdaptStimuli(stimulipanel.AnsFile);
                 var presentation = this.ReadCompetitionStimuli(stimulipanel.PresentationFile);
@@ -118,7 +121,9 @@ namespace MCAEmotiv.GUI.Controls
                 }
                 else
                     dataSource = new MockEEGDataSource();
-                this.Animate(new AdaptiveProvider(stp, presentation, class1, class2, settings, dataSource));
+
+                var classifiers = classifierPanel.SelectedClassifiers;
+                this.Animate(new AdaptiveProvider(stp, presentation, class1, class2, settings, dataSource, classifiers.Where(c => c.Settings.FeatureCount > 0).ToIArray()));
             });
 
             //Dialog boxes for saving and loading experiment settings
@@ -146,7 +151,8 @@ namespace MCAEmotiv.GUI.Controls
                 settings.PresentationFile = stimulipanel.PresentationFile;
                 settings.Class1File = stimulipanel.Class1File;
                 settings.Class2File = stimulipanel.Class2File;
-                settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
+                //settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
+                settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)classifierPanel.ArtifactDetectionSettings;
                 saveDialog.FileName = string.IsNullOrWhiteSpace(settings.ExperimentName) ? "my experiment" : settings.ExperimentName;
                 if (saveDialog.ShowDialog() != DialogResult.OK)
                     return;
@@ -175,7 +181,10 @@ namespace MCAEmotiv.GUI.Controls
                     stimulipanel.PresentationFile = settings.PresentationFile;
                     stimulipanel.Class1File = settings.Class1File;
                     stimulipanel.Class2File = settings.Class2File;
-                    artifactConfig.SetConfiguredObject(settings.ArtifactDetectionSettings);
+                    //NEED TO DO EACH CLASSIFIERPANEL PROPERTY ONE BY ONE :(
+                    //artifactConfig.SetConfiguredObject(settings.ArtifactDetectionSettings);
+                    //classifierPanel.SetConfiguredObject(settings.ArtifactDetectionSettings);
+
                 }
                 else
                     GUIUtils.Alert("Failed to load experiment info from " + openDialog.FileName, MessageBoxIcon.Error);
@@ -185,13 +194,14 @@ namespace MCAEmotiv.GUI.Controls
             //Put together the GUI
             var rows = GUIUtils.CreateTable(new[] { .5, .35, .15 }, Direction.Vertical);
             var col1 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
-            var col2 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
+            var col2 = GUIUtils.CreateTable(new[] { .5, .5}, Direction.Horizontal);
             var col3 = GUIUtils.CreateTable(new[] { .5, .5 }, Direction.Horizontal);
 
-            col2.Controls.Add(artifactConfig, 1, 0);
+            //col2.Controls.Add(artifactConfig, 1, 0);
             col1.Controls.Add(startButton, 1, 0);
             col1.Controls.Add(statusChecker, 0, 0);
             col2.Controls.Add(config, 0, 0);
+            col2.Controls.Add(classifierPanel, 1, 0);
             col3.Controls.Add(stimulipanel, 1, 0);
             col3.Controls.Add(buttonTable, 0, 0);
             rows.Controls.Add(col3, 0, 1);

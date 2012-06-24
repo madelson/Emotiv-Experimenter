@@ -51,7 +51,7 @@ namespace MCAEmotiv.GUI.Animation
                     lock (this)
                     {
                         if (this.hasValue)
-                            throw new Exception("Result already set!");
+                           throw new Exception("Result already set!");
 
                         this.value = value;
                         this.hasValue = true;
