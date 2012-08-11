@@ -150,6 +150,9 @@ namespace MCAEmotiv.GUI.Adaptive
         /// </summary>
         public ArtifactDetectionSettings ArtifactDetectionSettings { get; set; }
 
+        
+        //public ClassificationScheme ClassificationSettings { get; set; }
+
         /// <summary>
         /// Construct a settings object with the default parameter values
         /// </summary>

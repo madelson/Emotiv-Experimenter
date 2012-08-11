@@ -233,7 +233,7 @@ namespace MCAEmotiv.GUI.Configurations
         /// <summary>
         /// The classifier for this scheme
         /// </summary>
-        [Parameter("The classifier used by the scheme", DefaultValue = typeof(VotedPerceptron))]
+        [Parameter("The classifier used by the scheme", DefaultValue = typeof(PenalizedLogisticRegression))]
         public IClassifier Classifier { get; set; }
 
         /// <summary>

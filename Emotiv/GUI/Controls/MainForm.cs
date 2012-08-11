@@ -153,6 +153,8 @@ namespace MCAEmotiv.GUI.Controls
                 settings.Class2File = stimulipanel.Class2File;
                 //settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)artifactConfig.GetConfiguredObject();
                 settings.ArtifactDetectionSettings = (ArtifactDetectionSettings)classifierPanel.ArtifactDetectionSettings;
+                //ISSUE HERE
+                //settings.ClassificationSettings = (ClassificationScheme) classifierPanel
                 saveDialog.FileName = string.IsNullOrWhiteSpace(settings.ExperimentName) ? "my experiment" : settings.ExperimentName;
                 if (saveDialog.ShowDialog() != DialogResult.OK)
                     return;
