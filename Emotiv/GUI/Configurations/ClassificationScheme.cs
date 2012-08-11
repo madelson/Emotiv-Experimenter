@@ -205,7 +205,8 @@ namespace MCAEmotiv.GUI.Configurations
         public GeneralClassifierSettings()
         {
             this.SetParametersToDefaultValues();
-            this.SelectedBins = GetBinCount(this.BinWidthMillis).CountTo();
+            //this.SelectedBins = GetBinCount(this.BinWidthMillis).CountTo(); //Default all bins selected
+            this.SelectedBins = new int[0].AsIArray(); //Default no bins selected
         }
 
         /// <summary>

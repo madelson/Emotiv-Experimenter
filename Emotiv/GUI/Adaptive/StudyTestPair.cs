@@ -12,11 +12,13 @@ namespace MCAEmotiv.GUI.Adaptive
         public string answer;
         public int index;
         public double complevel;
+        public int times;
         public StudyTestPair(string tst, string ans, int index)
         {
             this.test = tst;
             this.answer = ans;
             this.index = index;
+            this.times = 0;
             this.complevel = -1;
         }
     }

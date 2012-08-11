@@ -76,7 +76,8 @@ namespace MCAEmotiv.GUI.Adaptive
             RandomizedQueue<StudyTestPair> done = new RandomizedQueue<StudyTestPair>();
             string filename = "adapt_data_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".csv";
             using (var logWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "adapt_log_" + settings.SubjectName + "_" + DateTime.Now.ToString("MM dd yyyy H mm ss") + ".txt")))
-            using (var dataWriter = new StreamWriter(Path.Combine("C:\\Users\\Nicole\\Documents\\MATLAB\\Thesis\\Adapt\\" + filename)))
+            //If using MATLAB reference, the datawriter path must match the location of your MATLAB code
+            using (var dataWriter = new StreamWriter(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), filename)))
             {
 
                 yield return new ChoiceView(new string[] 
@@ -165,7 +166,6 @@ namespace MCAEmotiv.GUI.Adaptive
         private IEnumerable<View> GetCompViews(ISynchronizeInvoke invoker, StreamWriter logWriter, StreamWriter dataWriter)
         {
             var currentCompTrialEntries = new List<EEGDataEntry>();
-            //To do: Save the date/time earlier and use it for both this and the dataWriter. Put it in GetEnumerator and pass to GetViews
             using (var compartifactListener = new EEGDataListener(invoker, null, data =>
             {
                 foreach (var entry in data)
@@ -200,11 +200,11 @@ namespace MCAEmotiv.GUI.Adaptive
                         foreach (var view in RunCompTrial(blocks[j].RemoveRandom(), (j % 2 + 1), dataWriter, logWriter, currentCompTrialEntries))
                             yield return view;
                     }
-                    //blockCount++;
                 }
                 logWriter.WriteLine("Training Phase Concluded.");
             }
         }
+
         public IEnumerable<View> RunCompTrial(string stimulus, int cls, StreamWriter dataWriter, StreamWriter logWriter, List<EEGDataEntry> currentTrialEntries)
         {
             //Rest
@@ -223,7 +223,6 @@ namespace MCAEmotiv.GUI.Adaptive
                     if (this.settings.ArtifactDetectionSettings.HasMotionArtifact(currentTrialEntries))
                     {
                         logWriter.WriteLine("Motion Artifact Detected");
-
                         needToRerun = true;
                     }
                     else
@@ -236,8 +235,9 @@ namespace MCAEmotiv.GUI.Adaptive
 
                             }
                         }
-                        //PROBLEM: do not know how to convert here.
-                        //classifier.AddTrial(currentTrialEntries.ToIArray<EEGDataEntry>);
+                        
+                        //Add training trials to the classifier
+                        classifier.AddTrial(currentTrialEntries.AsIArray());
 
                     }
                     currentTrialEntries.Clear();
@@ -391,12 +391,18 @@ namespace MCAEmotiv.GUI.Adaptive
             yield return new FixationView(this.settings.FixationTime);
             IViewResult result;
             logWriter.WriteLine("Trial: " + index);
+            stim.times++;
             var vocabView = new VocabView(stim.test, stim.answer, settings.DisplayTime, settings.DelayTime, false, out result);
             vocabView.DoOnDeploy(c => this.dataSource.Marker = index + 1);
             bool noWrite = false;
-            double[] judge = {1};
-            double[] zro = {0};
-            double[] newcomplevel = {-1};
+            //For MATLAB use.
+            //double[] judge = {1};
+            //double[] zro = {0};
+            //double[] newcomplevel = {-1};
+            double confidence = 0;
+            int judge = 1;
+            //TODO: PUT THIS IN THE GUI
+            double threshold = .4;
             vocabView.DoOnFinishing(() =>
             {
                 this.dataSource.Marker = EEGDataEntry.MARKER_DEFAULT;
@@ -424,9 +430,9 @@ namespace MCAEmotiv.GUI.Adaptive
                         //double[,] data2matlab = new double[numentries,15];
                         //double[,] zeros = new double[numentries,15];
                         //int i = 0;
-                        foreach (var entry in trialsDuringDelay)
+                        //MATLAB REFERENCE - converting the data to matlab format
+                        /*foreach (var entry in trialsDuringDelay)
                         {
-                            //MATLAB REFERENCE
                             //data2matlab[i, 0] = entry.RelativeTimeStamp;
                             //zeros[i, 0] = 0;
                             
@@ -438,8 +444,8 @@ namespace MCAEmotiv.GUI.Adaptive
                             //    j++;
                             //}
                             //i++;
-                        }
-                        //MATLAB REFERENCE
+                        }*/
+                        //MATLAB REFERENCE - perform prediction
                         //matlab.PutFullMatrix("data", "base", data2matlab, zeros);
                         //double[] complev = { stim.complevel };
                         //double[] zero = { 0 };
@@ -448,6 +454,24 @@ namespace MCAEmotiv.GUI.Adaptive
                         //matlab.Execute("[result rating] = adaptive(data, false, classifier, rating);");
                         //matlab.GetFullMatrix("result", "base", judge, zro);
                         //matlab.GetFullMatrix("rating", "base", newcomplevel, zro);
+                        
+                        //The calculation of where to place the item is based on the difference between the 3rd presentation
+                        //and the fourth presentation.  If an insufficient drop occurs, the competition level is saved as the
+                        //reference competition level until a drop does occur. The pre-drop competition level is saved
+                        //so that if the competition goes up in the future the correct judgement can be made.
+                       classifier.Predict(trialsDuringDelay.AsIArray(), out confidence);
+                       if (stim.times < 4)
+                           stim.complevel = confidence;
+                       else
+                       {
+                           if (stim.complevel - confidence > threshold)
+                               judge = 1;
+                           else
+                           {
+                               judge = 0;
+                               stim.complevel = confidence;
+                           }
+                       }
 
                     }
                     currentTrialEntries.Clear();
@@ -459,9 +483,7 @@ namespace MCAEmotiv.GUI.Adaptive
 
                 if ((bool)result.Value)
                 {
-                    if (stim.complevel < 0)
-                        stim.complevel = newcomplevel[0];
-                    if (judge[0] == 0)
+                    if (judge == 0)
                     {
                         quiz.Add(stim);
                     }
